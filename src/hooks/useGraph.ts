@@ -6,6 +6,50 @@ import { Character, GraphData, Relationship } from '@/types';
 
 const STORAGE_KEY = 'narrativeweb:graph';
 
+const DEFAULT_DATA: GraphData = {
+  id: uuidv4(),
+  title: '새로운 프로젝트',
+  description: '웹소설의 주요 등장인물들의 관계를 그려보세요.',
+  characters: [
+    { id: uuidv4(), name: '주인공', description: '이야기의 중심', color: '#3b82f6', created_at: new Date().toISOString() },
+    { id: uuidv4(), name: '조력자', description: '주인공을 돕는 역할', color: '#10b981', created_at: new Date().toISOString() },
+    { id: uuidv4(), name: '적대자', description: '주인공의 장애물', color: '#ef4444', created_at: new Date().toISOString() },
+    { id: uuidv4(), name: '사랑하는 사람', description: '감정적 연결', color: '#ec4899', created_at: new Date().toISOString() },
+  ],
+  relationships: [],
+};
+
+// 관계 데이터 생성 (문자열 ID 참조 문제 해결)
+const createDefaultRelationships = (characters: typeof DEFAULT_DATA.characters) => [
+  {
+    id: uuidv4(),
+    sourceId: characters[0].id,
+    targetId: characters[1].id,
+    type: 'friend' as const,
+    strength: 'strong' as const,
+    description: '믿을 수 있는 파트너',
+    created_at: new Date().toISOString(),
+  },
+  {
+    id: uuidv4(),
+    sourceId: characters[0].id,
+    targetId: characters[2].id,
+    type: 'enemy' as const,
+    strength: 'strong' as const,
+    description: '숙명의 적',
+    created_at: new Date().toISOString(),
+  },
+  {
+    id: uuidv4(),
+    sourceId: characters[0].id,
+    targetId: characters[3].id,
+    type: 'love' as const,
+    strength: 'medium' as const,
+    description: '애틋한 감정',
+    created_at: new Date().toISOString(),
+  },
+];
+
 export const useGraph = () => {
   const [graphData, setGraphData] = useState<GraphData>({
     id: '',
@@ -23,13 +67,9 @@ export const useGraph = () => {
       if (saved) {
         setGraphData(JSON.parse(saved));
       } else {
-        const newId = uuidv4();
         const initialData: GraphData = {
-          id: newId,
-          title: 'My Characters',
-          description: '',
-          characters: [],
-          relationships: [],
+          ...DEFAULT_DATA,
+          relationships: createDefaultRelationships(DEFAULT_DATA.characters),
         };
         localStorage.setItem(STORAGE_KEY, JSON.stringify(initialData));
         setGraphData(initialData);

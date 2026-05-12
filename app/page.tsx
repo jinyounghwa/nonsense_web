@@ -10,7 +10,7 @@ import ExportImport from '@/components/ExportImport';
 import { useGraph } from '@/hooks/useGraph';
 import { Character, Relationship } from '@/types';
 
-type TabType = 'character' | 'relationship' | 'graph';
+type TabType = 'character' | 'relationship' | 'export';
 type EditMode = null | 'character' | 'relationship';
 
 export default function Home() {
@@ -22,18 +22,15 @@ export default function Home() {
     addRelationship,
     updateRelationship,
     deleteRelationship,
-    exportToJSON,
     loadFromJSON,
     updateGraphInfo,
     loading,
   } = useGraph();
 
-  const [activeTab, setActiveTab] = useState<TabType>('graph');
+  const [activeTab, setActiveTab] = useState<TabType>('character');
   const [editMode, setEditMode] = useState<EditMode>(null);
   const [editingCharacter, setEditingCharacter] = useState<Character | null>(null);
-  const [editingRelationship, setEditingRelationship] = useState<Relationship | null>(
-    null
-  );
+  const [editingRelationship, setEditingRelationship] = useState<Relationship | null>(null);
   const [selectedCharacterId, setSelectedCharacterId] = useState<string | null>(null);
   const [graphTitle, setGraphTitle] = useState(graphData.title || '');
   const [graphDescription, setGraphDescription] = useState(graphData.description || '');
@@ -45,9 +42,10 @@ export default function Home() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
+      <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
         <div className="text-center">
-          <p className="text-lg font-semibold text-gray-800">로딩 중...</p>
+          <div className="w-12 h-12 border-4 border-purple-500 border-t-white rounded-full animate-spin mx-auto mb-4"></div>
+          <p className="text-lg font-semibold text-white">로딩 중...</p>
         </div>
       </div>
     );
@@ -63,9 +61,7 @@ export default function Home() {
     setEditMode(null);
   };
 
-  const handleRelationshipSubmit = (
-    relationship: Omit<Relationship, 'id' | 'created_at'>
-  ) => {
+  const handleRelationshipSubmit = (relationship: Omit<Relationship, 'id' | 'created_at'>) => {
     if (editingRelationship) {
       updateRelationship(editingRelationship.id, relationship);
       setEditingRelationship(null);
@@ -93,88 +89,90 @@ export default function Home() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
       {/* Header */}
-      <header className="bg-white shadow-md">
-        <div className="max-w-7xl mx-auto px-4 py-6">
+      <header className="bg-slate-800/50 backdrop-blur-md border-b border-purple-500/20 sticky top-0 z-50">
+        <div className="max-w-7xl mx-auto px-6 py-6">
           <div className="flex items-center justify-between mb-4">
             <div>
-              <h1 className="text-3xl font-bold text-gray-800">NarrativeWeb</h1>
-              <p className="text-gray-600">웹소설 인물 관계도 생성기</p>
+              <h1 className="text-4xl font-bold bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">
+                ✨ NarrativeWeb
+              </h1>
+              <p className="text-purple-300 text-sm mt-1">웹소설 인물 관계도 생성기</p>
             </div>
           </div>
-          <div className="space-y-3">
+          <div className="space-y-3 bg-slate-700/30 rounded-lg p-4 backdrop-blur-sm border border-purple-500/10">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label className="block text-xs font-semibold text-purple-300 mb-2 uppercase tracking-widest">
                 프로젝트 제목
               </label>
               <input
                 type="text"
                 value={graphTitle}
                 onChange={(e) => setGraphTitle(e.target.value)}
-                placeholder="프로젝트 제목"
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                placeholder="프로젝트 제목을 입력하세요"
+                className="w-full px-4 py-2 bg-slate-700 border border-purple-500/30 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 text-white placeholder-slate-400 transition"
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label className="block text-xs font-semibold text-purple-300 mb-2 uppercase tracking-widest">
                 설명
               </label>
               <textarea
                 value={graphDescription}
                 onChange={(e) => setGraphDescription(e.target.value)}
-                placeholder="프로젝트 설명"
+                placeholder="프로젝트 설명을 입력하세요"
                 rows={2}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-4 py-2 bg-slate-700 border border-purple-500/30 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 text-white placeholder-slate-400 transition"
               />
             </div>
             <button
               onClick={handleSaveGraphInfo}
-              className="w-full bg-gray-700 hover:bg-gray-800 text-white font-medium py-2 px-4 rounded-md transition"
+              className="w-full bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-500 hover:to-purple-600 text-white font-semibold py-2 px-4 rounded-lg transition duration-200 transform hover:scale-105"
             >
-              프로젝트 정보 저장
+              💾 저장
             </button>
           </div>
         </div>
       </header>
 
       {/* Main Content */}
-      <main className="max-w-7xl mx-auto px-4 py-8">
+      <main className="max-w-7xl mx-auto px-6 py-8">
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
           {/* Sidebar */}
           <div className="lg:col-span-1 space-y-4">
             {/* Tabs */}
-            <div className="bg-white rounded-lg shadow overflow-hidden">
-              <div className="flex">
+            <div className="bg-slate-800/50 backdrop-blur-md rounded-lg overflow-hidden border border-purple-500/20 shadow-xl">
+              <div className="flex gap-1 p-1">
                 <button
                   onClick={() => setActiveTab('character')}
-                  className={`flex-1 py-3 px-4 font-medium text-sm transition ${
+                  className={`flex-1 py-3 px-4 font-semibold text-sm transition-all rounded-md ${
                     activeTab === 'character'
-                      ? 'bg-blue-500 text-white'
-                      : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                      ? 'bg-gradient-to-r from-purple-600 to-purple-700 text-white shadow-lg'
+                      : 'text-slate-300 hover:text-white hover:bg-slate-700/50'
                   }`}
                 >
-                  캐릭터
+                  👤 캐릭터
                 </button>
                 <button
                   onClick={() => setActiveTab('relationship')}
-                  className={`flex-1 py-3 px-4 font-medium text-sm transition ${
+                  className={`flex-1 py-3 px-4 font-semibold text-sm transition-all rounded-md ${
                     activeTab === 'relationship'
-                      ? 'bg-blue-500 text-white'
-                      : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                      ? 'bg-gradient-to-r from-purple-600 to-purple-700 text-white shadow-lg'
+                      : 'text-slate-300 hover:text-white hover:bg-slate-700/50'
                   }`}
                 >
-                  관계
+                  🔗 관계
                 </button>
                 <button
-                  onClick={() => setActiveTab('graph')}
-                  className={`flex-1 py-3 px-4 font-medium text-sm transition ${
-                    activeTab === 'graph'
-                      ? 'bg-blue-500 text-white'
-                      : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                  onClick={() => setActiveTab('export')}
+                  className={`flex-1 py-3 px-4 font-semibold text-sm transition-all rounded-md ${
+                    activeTab === 'export'
+                      ? 'bg-gradient-to-r from-purple-600 to-purple-700 text-white shadow-lg'
+                      : 'text-slate-300 hover:text-white hover:bg-slate-700/50'
                   }`}
                 >
-                  그래프
+                  ⚙️ 내보내기
                 </button>
               </div>
             </div>
@@ -193,11 +191,7 @@ export default function Home() {
                       }}
                     />
                   )}
-                  {editMode !== 'character' && (
-                    <CharacterForm
-                      onSubmit={handleCharacterSubmit}
-                    />
-                  )}
+                  {editMode !== 'character' && <CharacterForm onSubmit={handleCharacterSubmit} />}
                   <CharacterList
                     characters={graphData.characters}
                     onDelete={deleteCharacter}
@@ -221,14 +215,11 @@ export default function Home() {
                     />
                   )}
                   {editMode !== 'relationship' && (
-                    <RelationshipForm
-                      characters={graphData.characters}
-                      onSubmit={handleRelationshipSubmit}
-                    />
+                    <RelationshipForm characters={graphData.characters} onSubmit={handleRelationshipSubmit} />
                   )}
                   {graphData.characters.length < 2 && (
-                    <div className="p-3 bg-yellow-50 border border-yellow-200 rounded text-sm text-yellow-700">
-                      관계를 추가하려면 최소 2개 이상의 캐릭터가 필요합니다
+                    <div className="p-3 bg-amber-500/20 border border-amber-500/50 rounded-lg text-sm text-amber-300">
+                      ⚠️ 관계를 추가하려면 최소 2명 이상의 캐릭터가 필요합니다
                     </div>
                   )}
                   <RelationshipList
@@ -240,20 +231,22 @@ export default function Home() {
                 </>
               )}
 
-              {activeTab === 'graph' && <ExportImport graphData={graphData} onImport={loadFromJSON} />}
+              {activeTab === 'export' && <ExportImport graphData={graphData} onImport={loadFromJSON} />}
             </div>
           </div>
 
           {/* Graph View */}
           <div className="lg:col-span-3">
-            <div className="bg-white rounded-lg shadow overflow-hidden">
-              <div className="p-4">
-                <h2 className="text-xl font-semibold text-gray-800 mb-4">
-                  인물 관계도
-                  <span className="ml-2 text-sm font-normal text-gray-600">
-                    ({graphData.characters.length}명, {graphData.relationships.length}개 관계)
+            <div className="bg-slate-800/50 backdrop-blur-md rounded-lg shadow-2xl overflow-hidden border border-purple-500/20">
+              <div className="p-4 border-b border-purple-500/20">
+                <h2 className="text-2xl font-bold text-white">
+                  🎭 인물 관계도
+                  <span className="ml-3 text-sm font-normal text-purple-300">
+                    {graphData.characters.length}명 · {graphData.relationships.length}개 관계
                   </span>
                 </h2>
+              </div>
+              <div className="bg-slate-900/50">
                 <GraphView
                   characters={graphData.characters}
                   relationships={graphData.relationships}
@@ -266,9 +259,9 @@ export default function Home() {
       </main>
 
       {/* Footer */}
-      <footer className="bg-white border-t border-gray-200 mt-12">
-        <div className="max-w-7xl mx-auto px-4 py-6 text-center text-sm text-gray-600">
-          <p>© 2024 NarrativeWeb. All rights reserved.</p>
+      <footer className="bg-slate-800/30 border-t border-purple-500/20 mt-12 backdrop-blur-sm">
+        <div className="max-w-7xl mx-auto px-6 py-6 text-center text-sm text-slate-400">
+          <p>Made with ❤️ for storytellers · NarrativeWeb © 2024</p>
         </div>
       </footer>
     </div>

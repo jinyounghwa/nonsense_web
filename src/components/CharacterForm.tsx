@@ -36,36 +36,39 @@ export default function CharacterForm({
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4 p-4 bg-white rounded-lg shadow">
+    <form
+      onSubmit={handleSubmit}
+      className="space-y-4 p-4 bg-slate-700/50 rounded-lg border border-purple-500/20 backdrop-blur-sm"
+    >
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1">
-          캐릭터 이름
+        <label className="block text-xs font-semibold text-purple-300 mb-2 uppercase tracking-widest">
+          이름
         </label>
         <input
           type="text"
           value={name}
           onChange={(e) => setName(e.target.value)}
-          placeholder="예: 앨리스"
-          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+          placeholder="캐릭터 이름"
+          className="w-full px-3 py-2 bg-slate-600 border border-purple-500/30 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 text-white placeholder-slate-400 transition"
         />
       </div>
 
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1">
-          설명 (선택)
+        <label className="block text-xs font-semibold text-purple-300 mb-2 uppercase tracking-widest">
+          설명
         </label>
         <textarea
           value={description}
           onChange={(e) => setDescription(e.target.value)}
-          placeholder="캐릭터에 대한 설명..."
+          placeholder="캐릭터 설명..."
           rows={3}
-          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className="w-full px-3 py-2 bg-slate-600 border border-purple-500/30 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 text-white placeholder-slate-400 transition"
         />
       </div>
 
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-2">
-          색상 선택
+        <label className="block text-xs font-semibold text-purple-300 mb-2 uppercase tracking-widest">
+          색상
         </label>
         <div className="flex flex-wrap gap-2">
           {PRESET_COLORS.map((c) => (
@@ -73,21 +76,20 @@ export default function CharacterForm({
               key={c}
               type="button"
               onClick={() => setColor(c)}
-              className={`w-10 h-10 rounded-full border-2 ${
-                color === c ? 'border-gray-800' : 'border-gray-300'
+              className={`w-10 h-10 rounded-full border-2 transition-transform hover:scale-110 ${
+                color === c ? 'border-white ring-2 ring-white ring-offset-2 ring-offset-slate-700' : 'border-slate-500'
               }`}
               style={{ backgroundColor: c }}
-              title={c}
             />
           ))}
         </div>
-        <div className="mt-3">
-          <label className="text-xs text-gray-600">직접 입력:</label>
+        <div className="mt-3 flex items-center gap-2">
+          <label className="text-xs text-purple-300">직접 선택:</label>
           <input
             type="color"
             value={color}
             onChange={(e) => setColor(e.target.value)}
-            className="w-16 h-8 cursor-pointer"
+            className="w-12 h-8 cursor-pointer rounded border border-purple-500/30"
           />
         </div>
       </div>
@@ -95,15 +97,15 @@ export default function CharacterForm({
       <div className="flex gap-2 pt-2">
         <button
           type="submit"
-          className="flex-1 bg-blue-500 hover:bg-blue-600 text-white font-medium py-2 px-4 rounded-md transition"
+          className="flex-1 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-500 hover:to-blue-600 text-white font-semibold py-2 px-4 rounded-md transition duration-200 transform hover:scale-105"
         >
-          {initialValue ? '수정' : '추가'}
+          {initialValue ? '✏️ 수정' : '➕ 추가'}
         </button>
         {onCancel && (
           <button
             type="button"
             onClick={onCancel}
-            className="flex-1 bg-gray-300 hover:bg-gray-400 text-gray-800 font-medium py-2 px-4 rounded-md transition"
+            className="flex-1 bg-slate-600 hover:bg-slate-500 text-white font-semibold py-2 px-4 rounded-md transition"
           >
             취소
           </button>

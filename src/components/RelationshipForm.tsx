@@ -48,16 +48,19 @@ export default function RelationshipForm({
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4 p-4 bg-white rounded-lg shadow">
-      <div className="grid grid-cols-2 gap-3">
+    <form
+      onSubmit={handleSubmit}
+      className="space-y-4 p-4 bg-slate-700/50 rounded-lg border border-purple-500/20 backdrop-blur-sm"
+    >
+      <div className="grid grid-cols-2 gap-2">
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
+          <label className="block text-xs font-semibold text-purple-300 mb-2 uppercase tracking-widest">
             캐릭터 1
           </label>
           <select
             value={sourceId}
             onChange={(e) => setSourceId(e.target.value)}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full px-3 py-2 bg-slate-600 border border-purple-500/30 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 text-white transition"
           >
             <option value="">선택</option>
             {characters.map((char) => (
@@ -69,13 +72,13 @@ export default function RelationshipForm({
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
+          <label className="block text-xs font-semibold text-purple-300 mb-2 uppercase tracking-widest">
             캐릭터 2
           </label>
           <select
             value={targetId}
             onChange={(e) => setTargetId(e.target.value)}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full px-3 py-2 bg-slate-600 border border-purple-500/30 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 text-white transition"
           >
             <option value="">선택</option>
             {characters.map((char) => (
@@ -88,13 +91,13 @@ export default function RelationshipForm({
       </div>
 
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1">
+        <label className="block text-xs font-semibold text-purple-300 mb-2 uppercase tracking-widest">
           관계 종류
         </label>
         <select
           value={type}
           onChange={(e) => setType(e.target.value as Relationship['type'])}
-          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className="w-full px-3 py-2 bg-slate-600 border border-purple-500/30 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 text-white transition"
         >
           {Object.entries(RELATIONSHIP_LABELS).map(([key, label]) => (
             <option key={key} value={key}>
@@ -105,13 +108,13 @@ export default function RelationshipForm({
       </div>
 
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1">
-          관계 강도
+        <label className="block text-xs font-semibold text-purple-300 mb-2 uppercase tracking-widest">
+          강도
         </label>
         <select
           value={strength}
           onChange={(e) => setStrength(e.target.value as Relationship['strength'])}
-          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className="w-full px-3 py-2 bg-slate-600 border border-purple-500/30 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 text-white transition"
         >
           <option value="weak">약함</option>
           <option value="medium">중간</option>
@@ -120,30 +123,30 @@ export default function RelationshipForm({
       </div>
 
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1">
-          설명 (선택)
+        <label className="block text-xs font-semibold text-purple-300 mb-2 uppercase tracking-widest">
+          설명
         </label>
         <textarea
           value={description}
           onChange={(e) => setDescription(e.target.value)}
           placeholder="관계에 대한 설명..."
           rows={2}
-          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className="w-full px-3 py-2 bg-slate-600 border border-purple-500/30 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 text-white placeholder-slate-400 transition"
         />
       </div>
 
       <div className="flex gap-2 pt-2">
         <button
           type="submit"
-          className="flex-1 bg-green-500 hover:bg-green-600 text-white font-medium py-2 px-4 rounded-md transition"
+          className="flex-1 bg-gradient-to-r from-green-600 to-green-700 hover:from-green-500 hover:to-green-600 text-white font-semibold py-2 px-4 rounded-md transition duration-200 transform hover:scale-105"
         >
-          {initialValue ? '수정' : '추가'}
+          {initialValue ? '✏️ 수정' : '🔗 추가'}
         </button>
         {onCancel && (
           <button
             type="button"
             onClick={onCancel}
-            className="flex-1 bg-gray-300 hover:bg-gray-400 text-gray-800 font-medium py-2 px-4 rounded-md transition"
+            className="flex-1 bg-slate-600 hover:bg-slate-500 text-white font-semibold py-2 px-4 rounded-md transition"
           >
             취소
           </button>

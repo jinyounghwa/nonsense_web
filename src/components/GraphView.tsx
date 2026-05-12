@@ -144,10 +144,10 @@ export default function GraphView({
 
   if (characters.length === 0) {
     return (
-      <div className="w-full h-full flex items-center justify-center bg-gray-50 rounded-lg border-2 border-dashed border-gray-300">
-        <div className="text-center text-gray-500">
-          <p className="text-lg font-medium">캐릭터를 추가해주세요</p>
-          <p className="text-sm mt-1">그래프가 여기에 표시됩니다</p>
+      <div className="w-full h-full flex items-center justify-center bg-slate-800/30 rounded-lg border-2 border-dashed border-purple-500/30">
+        <div className="text-center text-slate-400">
+          <p className="text-lg font-semibold">👥 캐릭터를 추가해주세요</p>
+          <p className="text-sm mt-2">관계도가 여기에 표시됩니다</p>
         </div>
       </div>
     );
@@ -156,7 +156,7 @@ export default function GraphView({
   return (
     <div
       ref={containerRef}
-      className="w-full h-full bg-gray-50 rounded-lg border border-gray-200"
+      className="w-full h-full bg-gradient-to-b from-slate-800 to-slate-900"
       style={{ minHeight: '600px' }}
     />
   );
