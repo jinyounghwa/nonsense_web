@@ -156,8 +156,8 @@ export default function GraphView({
   return (
     <div
       ref={containerRef}
-      className="w-full h-full bg-gradient-to-b from-slate-800 to-slate-900"
-      style={{ minHeight: '600px' }}
+      className="w-full h-full bg-gradient-to-b from-slate-800 to-slate-900 rounded-lg border border-purple-500/20"
+      style={{ minHeight: '100%' }}
     />
   );
 }

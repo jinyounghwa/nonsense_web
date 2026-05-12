@@ -147,10 +147,10 @@ export default function Home() {
       </header>
 
       {/* Main Content */}
-      <main className="max-w-7xl mx-auto px-6 py-8">
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+      <main className="w-full px-6 py-8">
+        <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
           {/* Sidebar */}
-          <div className="lg:col-span-1 space-y-4">
+          <div className="lg:col-span-2 space-y-4">
             {/* Tabs */}
             <div className="bg-slate-800/50 backdrop-blur-md rounded-lg overflow-hidden border border-purple-500/20 shadow-xl">
               <div className="flex gap-1 p-1">
@@ -255,7 +255,7 @@ export default function Home() {
           </div>
 
           {/* Graph View */}
-          <div className="lg:col-span-3">
+          <div className="lg:col-span-3 h-screen sticky top-24">
             <div className="bg-slate-800/50 backdrop-blur-md rounded-lg shadow-2xl overflow-hidden border border-purple-500/20">
               <div className="p-4 border-b border-purple-500/20">
                 <h2 className="text-2xl font-bold text-white">
