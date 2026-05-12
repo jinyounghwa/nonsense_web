@@ -64,9 +64,9 @@ export default function GraphView({
           fit: true,
         },
         barnesHut: {
-          gravitationalConstant: -15000,
+          gravitationalConstant: -12000,
           centralGravity: 0.3,
-          springLength: 150,
+          springLength: 200,
           springConstant: 0.04,
         },
       },
@@ -77,33 +77,52 @@ export default function GraphView({
         dragView: true,
       },
       nodes: {
-        shape: 'circle' as const,
+        shape: 'box' as const,
+        margin: {
+          top: 10,
+          bottom: 10,
+          left: 10,
+          right: 10,
+        },
+        widthConstraint: {
+          maximum: 200,
+        },
         scaling: {
-          min: 30,
-          max: 60,
+          min: 80,
+          max: 150,
           label: {
             enabled: true,
-            min: 14,
-            max: 30,
+            min: 16,
+            max: 32,
           },
         },
         font: {
-          size: 14,
-          face: 'Georgia, serif',
+          size: 16,
+          face: 'Segoe UI, sans-serif',
           color: '#ffffff',
           bold: {
-            size: 16,
+            size: 18,
           },
+          multi: false,
         },
+        borderWidth: 3,
+        borderWidthSelected: 4,
       },
       edges: {
+        width: 2,
         smooth: {
           enabled: true,
           type: 'continuous',
           roundness: 0.5,
         },
         arrows: {
-          to: { enabled: false },
+          from: { enabled: false, scaleFactor: 0.5 },
+          to: { enabled: true, scaleFactor: 0.5 },
+          middle: { enabled: false },
+        },
+        arrowStrikethrough: false,
+        color: {
+          opacity: 0.8,
         },
       },
     };

@@ -34,6 +34,7 @@ export default function Home() {
   const [selectedCharacterId, setSelectedCharacterId] = useState<string | null>(null);
   const [graphTitle, setGraphTitle] = useState(graphData.title || '');
   const [graphDescription, setGraphDescription] = useState(graphData.description || '');
+  const [showSidebar, setShowSidebar] = useState(true);
 
   useEffect(() => {
     setGraphTitle(graphData.title || '');
@@ -110,6 +111,13 @@ export default function Home() {
               </h1>
               <p className="text-purple-300 text-sm mt-1">웹소설 인물 관계도 생성기</p>
             </div>
+            <button
+              onClick={() => setShowSidebar(!showSidebar)}
+              className="hidden lg:flex bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-500 hover:to-purple-600 text-white px-4 py-2 rounded-lg transition items-center gap-2"
+              title={showSidebar ? '사이드바 숨기기' : '사이드바 표시'}
+            >
+              {showSidebar ? '◀ 편집창 숨기기' : '▶ 편집창 보기'}
+            </button>
           </div>
           <div className="space-y-3 bg-slate-700/30 rounded-lg p-4 backdrop-blur-sm border border-purple-500/10">
             <div>
@@ -148,8 +156,18 @@ export default function Home() {
 
       {/* Main Content */}
       <main className="w-full px-6 py-8">
-        <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
+        <div className={`grid grid-cols-1 ${showSidebar ? 'lg:grid-cols-5' : 'lg:grid-cols-1'} gap-6`}>
+          {/* Toggle Button */}
+          <button
+            onClick={() => setShowSidebar(!showSidebar)}
+            className="lg:hidden fixed bottom-6 right-6 z-40 bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-500 hover:to-purple-600 text-white p-3 rounded-full shadow-lg transition"
+            title={showSidebar ? '사이드바 숨기기' : '사이드바 표시'}
+          >
+            {showSidebar ? '◀' : '▶'}
+          </button>
+
           {/* Sidebar */}
+          {showSidebar && (
           <div className="lg:col-span-2 space-y-4">
             {/* Tabs */}
             <div className="bg-slate-800/50 backdrop-blur-md rounded-lg overflow-hidden border border-purple-500/20 shadow-xl">
@@ -253,6 +271,7 @@ export default function Home() {
               {activeTab === 'export' && <ExportImport graphData={graphData} onImport={loadFromJSON} />}
             </div>
           </div>
+          )}
 
           {/* Graph View */}
           <div className="lg:col-span-3 h-screen sticky top-24">
