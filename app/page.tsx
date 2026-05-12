@@ -61,6 +61,11 @@ export default function Home() {
     setEditMode(null);
   };
 
+  const handleMultiCharacterSubmit = (characters: Omit<Character, 'id' | 'created_at'>[]) => {
+    characters.forEach(char => addCharacter(char));
+    setEditMode(null);
+  };
+
   const handleRelationshipSubmit = (relationship: Omit<Relationship, 'id' | 'created_at'>) => {
     if (editingRelationship) {
       updateRelationship(editingRelationship.id, relationship);
@@ -68,6 +73,11 @@ export default function Home() {
     } else {
       addRelationship(relationship);
     }
+    setEditMode(null);
+  };
+
+  const handleMultiRelationshipSubmit = (relationships: Omit<Relationship, 'id' | 'created_at'>[]) => {
+    relationships.forEach(rel => addRelationship(rel));
     setEditMode(null);
   };
 
@@ -191,7 +201,12 @@ export default function Home() {
                       }}
                     />
                   )}
-                  {editMode !== 'character' && <CharacterForm onSubmit={handleCharacterSubmit} />}
+                  {editMode !== 'character' && (
+                    <CharacterForm
+                      onSubmit={handleCharacterSubmit}
+                      onMultiSubmit={handleMultiCharacterSubmit}
+                    />
+                  )}
                   <CharacterList
                     characters={graphData.characters}
                     onDelete={deleteCharacter}
@@ -215,7 +230,11 @@ export default function Home() {
                     />
                   )}
                   {editMode !== 'relationship' && (
-                    <RelationshipForm characters={graphData.characters} onSubmit={handleRelationshipSubmit} />
+                    <RelationshipForm
+                      characters={graphData.characters}
+                      onSubmit={handleRelationshipSubmit}
+                      onMultiSubmit={handleMultiRelationshipSubmit}
+                    />
                   )}
                   {graphData.characters.length < 2 && (
                     <div className="p-3 bg-amber-500/20 border border-amber-500/50 rounded-lg text-sm text-amber-300">
