@@ -1,6 +1,7 @@
 'use client';
 
-import { useEffect, useRef, useState, useCallback } from 'react';
+import { useEffect, useRef, useState, useCallback, useMemo } from 'react';
+import { renderToStaticMarkup } from 'react-dom/server';
 import { Network } from 'vis-network/peer';
 import {
   Share2,
@@ -20,10 +21,12 @@ import {
   RELATIONSHIP_COLORS,
   RELATIONSHIP_LABELS,
   RELATIONSHIP_LABELS_SHORT,
+  RELATIONSHIP_EMOJIS,
   STRENGTH_WIDTH,
   Node,
   Edge,
 } from '@/types';
+import { RelationshipIcon } from './RelationshipIcon';
 
 interface GraphViewProps {
   characters: Character[];
@@ -101,8 +104,9 @@ export default function GraphView({
     });
 
     const edges: Edge[] = relationships.map((rel) => {
+      const baseLabel = rel.label || RELATIONSHIP_LABELS_SHORT[rel.type];
       const edgeLabel = showLabels
-        ? (rel.label || RELATIONSHIP_LABELS_SHORT[rel.type])
+        ? `       ${baseLabel}` // Add spaces to make room for the icon
         : undefined;
 
       return {
@@ -219,6 +223,62 @@ export default function GraphView({
         if (event.edges.length > 0 && event.nodes.length === 0) {
           onSelectEdge(event.edges[0]);
         }
+      });
+    }
+
+    // Pre-generate images for each relationship type
+    const icons: Record<string, HTMLImageElement> = {};
+    const types = Array.from(new Set(relationships.map(r => r.type)));
+    
+    types.forEach(type => {
+      const svgString = renderToStaticMarkup(
+        <RelationshipIcon type={type} color={RELATIONSHIP_COLORS[type]} size={16} />
+      );
+      const img = new Image();
+      img.onload = () => {
+        if (networkRef.current) {
+          networkRef.current.redraw();
+        }
+      };
+      img.src = `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svgString)}`;
+      icons[type] = img;
+    });
+
+    // Custom drawing for edge icons
+    if (showLabels) {
+      network.on('afterDrawing', (ctx: CanvasRenderingContext2D) => {
+        relationships.forEach(rel => {
+          const edgeId = rel.id;
+          const edgeObj = (network as any).body.edges[edgeId];
+          if (!edgeObj || !edgeObj.labelModule || !edgeObj.labelModule.size) return;
+
+          let lx = edgeObj.labelModule?.x;
+          let ly = edgeObj.labelModule?.y;
+          
+          if (lx === undefined || ly === undefined) {
+            if (edgeObj.edgeType && typeof edgeObj.edgeType.getPoint === 'function') {
+              const pt = edgeObj.edgeType.getPoint(0.5);
+              lx = pt.x;
+              ly = pt.y;
+            }
+          }
+
+          const labelWidth = edgeObj.labelModule?.size?.width;
+
+          if (lx !== undefined && ly !== undefined && labelWidth !== undefined) {
+            const img = icons[rel.type];
+            if (img && img.complete) {
+              const size = 16;
+              // Add a white background to the icon to make it legible and clean
+              ctx.beginPath();
+              ctx.arc(lx - labelWidth / 2 + size / 2, ly, size / 2 + 2, 0, 2 * Math.PI);
+              ctx.fillStyle = '#0f1115'; // Match background
+              ctx.fill();
+              
+              ctx.drawImage(img, lx - labelWidth / 2, ly - size / 2, size, size);
+            }
+          }
+        });
       });
     }
 
@@ -358,6 +418,7 @@ export default function GraphView({
                   className="w-2 h-2 rounded-full"
                   style={{ backgroundColor: RELATIONSHIP_COLORS[type] }}
                 />
+                <RelationshipIcon type={type} className="w-3 h-3 text-slate-400" />
                 <span className="text-[10px] text-slate-400 font-medium">
                   {RELATIONSHIP_LABELS[type]}
                 </span>

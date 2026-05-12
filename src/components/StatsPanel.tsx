@@ -2,6 +2,7 @@
 
 import { Character, CharacterGroup, GraphData, RELATIONSHIP_COLORS, RELATIONSHIP_LABELS } from '@/types';
 import { BarChart3, Users, Share2, TrendingUp, Award, AlertTriangle, PieChart } from 'lucide-react';
+import { RelationshipIcon } from './RelationshipIcon';
 
 interface StatsPanelProps {
   graphData: GraphData;
@@ -93,7 +94,10 @@ export default function StatsPanel({ graphData }: StatsPanelProps) {
                 return (
                   <div key={type} className="space-y-1">
                     <div className="flex items-center justify-between">
-                      <span className="text-[11px] text-slate-400 font-medium">{RELATIONSHIP_LABELS[type as keyof typeof RELATIONSHIP_LABELS]}</span>
+                      <div className="flex items-center gap-1.5">
+                        <RelationshipIcon type={type as keyof typeof RELATIONSHIP_LABELS} className="w-3 h-3 text-slate-400" />
+                        <span className="text-[11px] text-slate-400 font-medium">{RELATIONSHIP_LABELS[type as keyof typeof RELATIONSHIP_LABELS]}</span>
+                      </div>
                       <span className="text-[11px] text-slate-500 font-bold">{count} ({pct}%)</span>
                     </div>
                     <div className="w-full h-1.5 bg-white/5 rounded-full overflow-hidden">

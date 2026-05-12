@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { Character, Relationship, RELATIONSHIP_COLORS, RELATIONSHIP_LABELS } from '@/types';
 import { Share2, Edit2, Trash2, Hash, ArrowRightLeft, Search, X, ArrowRight, Minus } from 'lucide-react';
 import { motion } from 'framer-motion';
+import { RelationshipIcon } from './RelationshipIcon';
 
 interface RelationshipListProps {
   relationships: Relationship[];
@@ -157,12 +158,13 @@ export default function RelationshipList({
 
                 <div className="flex items-center gap-2 flex-wrap">
                   <div
-                    className="px-2 py-0.5 rounded-md text-[10px] font-bold uppercase tracking-wider"
+                    className="flex items-center gap-1.5 px-2 py-0.5 rounded-md text-[10px] font-bold uppercase tracking-wider"
                     style={{
                       backgroundColor: RELATIONSHIP_COLORS[rel.type] + '20',
                       color: RELATIONSHIP_COLORS[rel.type],
                     }}
                   >
+                    <RelationshipIcon type={rel.type} className="w-3 h-3" />
                     {RELATIONSHIP_LABELS[rel.type]}
                   </div>
                   <div className="px-2 py-0.5 rounded-md text-[10px] font-bold uppercase tracking-wider bg-white/5 text-slate-500">
