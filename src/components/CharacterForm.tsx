@@ -2,6 +2,8 @@
 
 import { useState } from 'react';
 import { Character } from '@/types';
+import { UserPlus, Users, X, Check, Paintbrush, Info } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 
 interface CharacterFormProps {
   onSubmit: (character: Omit<Character, 'id' | 'created_at'>) => void;
@@ -13,6 +15,7 @@ interface CharacterFormProps {
 const PRESET_COLORS = [
   '#3b82f6', '#8b5cf6', '#ec4899', '#ef4444',
   '#f59e0b', '#10b981', '#06b6d4', '#f97316',
+  '#1e293b', '#64748b', '#ffffff', '#000000',
 ];
 
 export default function CharacterForm({
@@ -29,10 +32,7 @@ export default function CharacterForm({
 
   const handleSingleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!name.trim()) {
-      alert('캐릭터 이름을 입력해주세요');
-      return;
-    }
+    if (!name.trim()) return;
     onSubmit({ name: name.trim(), description: description.trim(), color });
     setName('');
     setDescription('');
@@ -41,10 +41,7 @@ export default function CharacterForm({
 
   const handleBulkSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!bulkInput.trim()) {
-      alert('캐릭터 정보를 입력해주세요');
-      return;
-    }
+    if (!bulkInput.trim()) return;
 
     const lines = bulkInput.trim().split('\n');
     const characters: Omit<Character, 'id' | 'created_at'>[] = [];
@@ -60,10 +57,7 @@ export default function CharacterForm({
       }
     });
 
-    if (characters.length === 0) {
-      alert('유효한 캐릭터 정보가 없습니다');
-      return;
-    }
+    if (characters.length === 0) return;
 
     if (onMultiSubmit) {
       onMultiSubmit(characters);
@@ -72,127 +66,146 @@ export default function CharacterForm({
   };
 
   return (
-    <form
-      onSubmit={mode === 'single' ? handleSingleSubmit : handleBulkSubmit}
-      className="space-y-4 p-4 bg-slate-700/50 rounded-lg border border-purple-500/20 backdrop-blur-sm"
-    >
+    <div className="space-y-6">
       {/* Mode Selector */}
-      <div className="flex gap-2 mb-4">
-        <button
-          type="button"
-          onClick={() => setMode('single')}
-          className={`flex-1 py-2 px-3 rounded-md font-semibold text-sm transition-all ${
-            mode === 'single'
-              ? 'bg-blue-600 text-white'
-              : 'bg-slate-600/50 text-slate-300 hover:bg-slate-600'
-          }`}
-        >
-          1개 추가
-        </button>
-        <button
-          type="button"
-          onClick={() => setMode('multi')}
-          className={`flex-1 py-2 px-3 rounded-md font-semibold text-sm transition-all ${
-            mode === 'multi'
-              ? 'bg-blue-600 text-white'
-              : 'bg-slate-600/50 text-slate-300 hover:bg-slate-600'
-          }`}
-        >
-          여러개 추가
-        </button>
-      </div>
-
-      {mode === 'single' ? (
-        <>
-          <div>
-            <label className="block text-xs font-semibold text-purple-300 mb-2 uppercase tracking-widest">
-              이름
-            </label>
-            <input
-              type="text"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              placeholder="캐릭터 이름"
-              className="w-full px-3 py-2 bg-slate-600 border border-purple-500/30 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 text-white placeholder-slate-400 transition"
-            />
-          </div>
-
-          <div>
-            <label className="block text-xs font-semibold text-purple-300 mb-2 uppercase tracking-widest">
-              설명
-            </label>
-            <textarea
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-              placeholder="캐릭터 설명..."
-              rows={3}
-              className="w-full px-3 py-2 bg-slate-600 border border-purple-500/30 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 text-white placeholder-slate-400 transition"
-            />
-          </div>
-
-          <div>
-            <label className="block text-xs font-semibold text-purple-300 mb-2 uppercase tracking-widest">
-              색상
-            </label>
-            <div className="flex flex-wrap gap-2">
-              {PRESET_COLORS.map((c) => (
-                <button
-                  key={c}
-                  type="button"
-                  onClick={() => setColor(c)}
-                  className={`w-10 h-10 rounded-full border-2 transition-transform hover:scale-110 ${
-                    color === c ? 'border-white ring-2 ring-white ring-offset-2 ring-offset-slate-700' : 'border-slate-500'
-                  }`}
-                  style={{ backgroundColor: c }}
-                />
-              ))}
-            </div>
-            <div className="mt-3 flex items-center gap-2">
-              <label className="text-xs text-purple-300">직접 선택:</label>
-              <input
-                type="color"
-                value={color}
-                onChange={(e) => setColor(e.target.value)}
-                className="w-12 h-8 cursor-pointer rounded border border-purple-500/30"
-              />
-            </div>
-          </div>
-        </>
-      ) : (
-        <div>
-          <label className="block text-xs font-semibold text-purple-300 mb-2 uppercase tracking-widest">
-            캐릭터 정보 (이름 | 설명 | 색상)
-          </label>
-          <textarea
-            value={bulkInput}
-            onChange={(e) => setBulkInput(e.target.value)}
-            placeholder="예시:&#10;주인공 | 용감한 검사 | #3b82f6&#10;조력자 | 현명한 마법사 | #8b5cf6&#10;적대자 | 신비로운 암흑기사"
-            rows={6}
-            className="w-full px-3 py-2 bg-slate-600 border border-purple-500/30 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 text-white placeholder-slate-400 transition font-mono text-sm"
-          />
-          <p className="text-xs text-slate-400 mt-2">
-            💡 한 줄에 하나씩, 파이프(|)로 구분하세요. 색상은 생략 가능합니다.
-          </p>
+      {!initialValue && (
+        <div className="flex p-1 bg-white/5 rounded-xl border border-white/5">
+          <button
+            type="button"
+            onClick={() => setMode('single')}
+            className={`flex-1 flex items-center justify-center gap-2 py-2 rounded-lg text-xs font-bold uppercase transition-all ${
+              mode === 'single'
+                ? 'bg-white/10 text-white shadow-lg'
+                : 'text-slate-500 hover:text-slate-300'
+            }`}
+          >
+            <UserPlus className="w-3 h-3" />
+            단일 추가
+          </button>
+          <button
+            type="button"
+            onClick={() => setMode('multi')}
+            className={`flex-1 flex items-center justify-center gap-2 py-2 rounded-lg text-xs font-bold uppercase transition-all ${
+              mode === 'multi'
+                ? 'bg-white/10 text-white shadow-lg'
+                : 'text-slate-500 hover:text-slate-300'
+            }`}
+          >
+            <Users className="w-3 h-3" />
+            일괄 추가
+          </button>
         </div>
       )}
 
-      <div className="flex gap-2 pt-2">
-        <button
-          type="submit"
-          className="flex-1 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-500 hover:to-blue-600 text-white font-semibold py-2 px-4 rounded-md transition duration-200 transform hover:scale-105"
-        >
-          {initialValue ? '✏️ 수정' : mode === 'single' ? '➕ 추가' : '➕ 모두 추가'}
-        </button>
-        {onCancel && (
+      <form onSubmit={mode === 'single' ? handleSingleSubmit : handleBulkSubmit} className="space-y-5">
+        <AnimatePresence mode="wait">
+          {mode === 'single' ? (
+            <motion.div
+              key="single"
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+              className="space-y-5"
+            >
+              <div className="space-y-2">
+                <label className="text-[10px] font-bold uppercase tracking-widest text-slate-500 ml-1">캐릭터 이름</label>
+                <input
+                  type="text"
+                  autoFocus
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  placeholder="예: 루인 벨제뷔트"
+                  className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm text-white placeholder:text-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 transition-all"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-[10px] font-bold uppercase tracking-widest text-slate-500 ml-1">설명 및 역할</label>
+                <textarea
+                  value={description}
+                  onChange={(e) => setDescription(e.target.value)}
+                  placeholder="예: 제국 제1기사단장, 주인공의 스승"
+                  rows={2}
+                  className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm text-white placeholder:text-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 transition-all resize-none"
+                />
+              </div>
+
+              <div className="space-y-3">
+                <label className="text-[10px] font-bold uppercase tracking-widest text-slate-500 ml-1 flex items-center gap-2">
+                  <Paintbrush className="w-3 h-3" />
+                  테마 색상
+                </label>
+                <div className="grid grid-cols-6 gap-2">
+                  {PRESET_COLORS.map((c) => (
+                    <button
+                      key={c}
+                      type="button"
+                      onClick={() => setColor(c)}
+                      className={`aspect-square rounded-lg border-2 transition-all hover:scale-110 active:scale-95 ${
+                        color === c ? 'border-white shadow-[0_0_15px_rgba(255,255,255,0.3)]' : 'border-transparent'
+                      }`}
+                      style={{ backgroundColor: c }}
+                    />
+                  ))}
+                  <div className="relative group aspect-square rounded-lg border border-white/10 flex items-center justify-center hover:bg-white/5 transition-all overflow-hidden">
+                    <input
+                      type="color"
+                      value={color}
+                      onChange={(e) => setColor(e.target.value)}
+                      className="absolute inset-0 opacity-0 cursor-pointer w-full h-full scale-150"
+                    />
+                    <Plus className="w-4 h-4 text-slate-500 group-hover:text-white transition-colors" />
+                  </div>
+                </div>
+              </div>
+            </motion.div>
+          ) : (
+            <motion.div
+              key="multi"
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+              className="space-y-4"
+            >
+              <div className="space-y-2">
+                <label className="text-[10px] font-bold uppercase tracking-widest text-slate-500 ml-1">일괄 데이터 입력</label>
+                <textarea
+                  value={bulkInput}
+                  onChange={(e) => setBulkInput(e.target.value)}
+                  placeholder="이름 | 설명 | 색상&#10;루인 | 기사단장 | #3b82f6&#10;엘레나 | 성녀 | #ec4899"
+                  rows={6}
+                  className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm text-white placeholder:text-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 transition-all font-mono"
+                />
+              </div>
+              <div className="flex gap-2 p-3 bg-indigo-500/5 rounded-xl border border-indigo-500/10">
+                <Info className="w-4 h-4 text-indigo-400 shrink-0 mt-0.5" />
+                <p className="text-[10px] text-indigo-300/70 leading-relaxed font-medium">
+                  각 줄에 한 명씩 입력하세요. 이름 뒤에 파이프(|)를 사용하여 설명과 헥사 색상 코드를 추가할 수 있습니다.
+                </p>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        <div className="flex gap-2 pt-2">
           <button
-            type="button"
-            onClick={onCancel}
-            className="flex-1 bg-slate-600 hover:bg-slate-500 text-white font-semibold py-2 px-4 rounded-md transition"
+            type="submit"
+            className="flex-1 flex items-center justify-center gap-2 bg-indigo-500 hover:bg-indigo-600 text-white font-bold py-3 rounded-xl transition-all shadow-lg shadow-indigo-500/20 active:scale-95"
           >
-            취소
+            {initialValue ? <Check className="w-4 h-4" /> : <Plus className="w-4 h-4" />}
+            <span>{initialValue ? '수정 완료' : mode === 'single' ? '캐릭터 추가' : '일괄 등록'}</span>
           </button>
-        )}
-      </div>
-    </form>
+          {onCancel && (
+            <button
+              type="button"
+              onClick={onCancel}
+              className="px-4 flex items-center justify-center gap-2 bg-white/5 hover:bg-white/10 text-slate-400 hover:text-white font-bold rounded-xl transition-all border border-white/5"
+            >
+              <X className="w-4 h-4" />
+            </button>
+          )}
+        </div>
+      </form>
+    </div>
   );
 }

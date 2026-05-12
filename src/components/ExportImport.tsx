@@ -2,6 +2,8 @@
 
 import { useRef, useState } from 'react';
 import { GraphData } from '@/types';
+import { Download, Upload, FileJson, Info, AlertCircle, CheckCircle2 } from 'lucide-react';
+import { motion } from 'framer-motion';
 
 interface ExportImportProps {
   graphData: GraphData;
@@ -10,7 +12,8 @@ interface ExportImportProps {
 
 export default function ExportImport({ graphData, onImport }: ExportImportProps) {
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const [importError, setImportError] = useState<string | null>(null);
+  const [importStatus, setImportStatus] = useState<'idle' | 'success' | 'error'>('idle');
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   const handleExport = () => {
     const data = {
@@ -49,16 +52,17 @@ export default function ExportImport({ graphData, onImport }: ExportImportProps)
         const data = JSON.parse(content) as GraphData;
 
         if (!Array.isArray(data.characters) || !Array.isArray(data.relationships)) {
-          throw new Error('Invalid file format');
+          throw new Error('올바른 NarrativeWeb 데이터 형식이 아닙니다.');
         }
 
         onImport(data);
-        setImportError(null);
-        alert('성공적으로 불러왔습니다');
+        setImportStatus('success');
+        setErrorMessage(null);
+        setTimeout(() => setImportStatus('idle'), 3000);
       } catch (err) {
-        const message = err instanceof Error ? err.message : 'Unknown error';
-        setImportError(`파일을 읽을 수 없습니다: ${message}`);
-        alert(`파일을 읽을 수 없습니다: ${message}`);
+        setImportStatus('error');
+        setErrorMessage(err instanceof Error ? err.message : '파일을 읽는 중 오류가 발생했습니다.');
+        setTimeout(() => setImportStatus('idle'), 5000);
       }
     };
     reader.readAsText(file);
@@ -100,29 +104,51 @@ export default function ExportImport({ graphData, onImport }: ExportImportProps)
   };
 
   return (
-    <div className="space-y-3 p-4 bg-slate-700/50 rounded-lg border border-purple-500/20 backdrop-blur-sm">
-      <h3 className="text-sm font-bold text-purple-300 uppercase tracking-widest">내보내기 & 불러오기</h3>
+    <div className="space-y-6">
+      <div className="grid grid-cols-1 gap-3">
+        <button
+          onClick={handleExport}
+          className="group flex items-center justify-between p-4 bg-white/5 border border-white/5 hover:bg-white/10 hover:border-indigo-500/30 rounded-2xl transition-all text-left"
+        >
+          <div className="flex items-center gap-4">
+            <div className="w-10 h-10 rounded-xl bg-indigo-500/10 flex items-center justify-center text-indigo-400 group-hover:bg-indigo-500 group-hover:text-white transition-all">
+              <Download className="w-5 h-5" />
+            </div>
+            <div>
+              <p className="text-sm font-bold text-white">데이터 내보내기</p>
+              <p className="text-[10px] text-slate-500 font-medium mt-0.5">현재 프로젝트를 JSON 파일로 저장합니다.</p>
+            </div>
+          </div>
+        </button>
 
-      <div className="flex flex-col gap-2">
-        <div className="grid grid-cols-2 gap-2">
-          <button
-            onClick={handleExport}
-            className="bg-purple-600/80 hover:bg-purple-600 text-white font-semibold py-2 px-3 rounded-md transition text-sm"
-          >
-            📥 내보내기
-          </button>
-          <button
-            onClick={handleImportClick}
-            className="bg-indigo-600/80 hover:bg-indigo-600 text-white font-semibold py-2 px-3 rounded-md transition text-sm"
-          >
-            📤 불러오기
-          </button>
-        </div>
+        <button
+          onClick={handleImportClick}
+          className="group flex items-center justify-between p-4 bg-white/5 border border-white/5 hover:bg-white/10 hover:border-purple-500/30 rounded-2xl transition-all text-left"
+        >
+          <div className="flex items-center gap-4">
+            <div className="w-10 h-10 rounded-xl bg-purple-500/10 flex items-center justify-center text-purple-400 group-hover:bg-purple-500 group-hover:text-white transition-all">
+              <Upload className="w-5 h-5" />
+            </div>
+            <div>
+              <p className="text-sm font-bold text-white">데이터 불러오기</p>
+              <p className="text-[10px] text-slate-500 font-medium mt-0.5">저장된 JSON 파일을 불러와 복원합니다.</p>
+            </div>
+          </div>
+        </button>
+
         <button
           onClick={handleDownloadSample}
-          className="w-full bg-gradient-to-r from-amber-600 to-orange-600 hover:from-amber-500 hover:to-orange-500 text-white font-semibold py-2 px-4 rounded-md transition"
+          className="group flex items-center justify-between p-4 bg-white/5 border border-white/5 hover:bg-white/10 hover:border-amber-500/30 rounded-2xl transition-all text-left"
         >
-          📋 샘플 다운로드
+          <div className="flex items-center gap-4">
+            <div className="w-10 h-10 rounded-xl bg-amber-500/10 flex items-center justify-center text-amber-400 group-hover:bg-amber-500 group-hover:text-white transition-all">
+              <FileJson className="w-5 h-5" />
+            </div>
+            <div>
+              <p className="text-sm font-bold text-white">샘플 데이터</p>
+              <p className="text-[10px] text-slate-500 font-medium mt-0.5">구조를 파악할 수 있는 예시 데이터를 받습니다.</p>
+            </div>
+          </div>
         </button>
       </div>
 
@@ -134,15 +160,30 @@ export default function ExportImport({ graphData, onImport }: ExportImportProps)
         className="hidden"
       />
 
-      {importError && (
-        <div className="p-3 bg-red-600/20 border border-red-500/50 rounded text-sm text-red-300">
-          ⚠️ {importError}
-        </div>
-      )}
-
-      <div className="text-xs text-slate-400 pt-2 border-t border-slate-600/50">
-        <p>💾 JSON으로 프로젝트를 저장하고 복구할 수 있습니다</p>
+      <div className="flex gap-2 p-3 bg-white/5 rounded-xl border border-white/5">
+        <Info className="w-4 h-4 text-slate-500 shrink-0 mt-0.5" />
+        <p className="text-[10px] text-slate-500 leading-relaxed font-medium">
+          데이터는 브라우저 로컬 스토리지에 자동 저장되지만, 브라우저 캐시 삭제 시 데이터가 소실될 수 있습니다. 중요한 프로젝트는 반드시 파일로 백업하세요.
+        </p>
       </div>
+
+      <motion.div
+        animate={importStatus !== 'idle' ? { opacity: 1, y: 0 } : { opacity: 0, y: 10 }}
+        className="fixed bottom-10 left-10 right-10 sm:left-auto sm:right-10 sm:w-80 z-50 pointer-events-none"
+      >
+        {importStatus === 'success' && (
+          <div className="p-4 bg-emerald-500 text-white rounded-2xl shadow-2xl flex items-center gap-3">
+            <CheckCircle2 className="w-5 h-5" />
+            <p className="text-xs font-bold uppercase tracking-widest">불러오기 성공</p>
+          </div>
+        )}
+        {importStatus === 'error' && (
+          <div className="p-4 bg-red-500 text-white rounded-2xl shadow-2xl flex items-center gap-3">
+            <AlertCircle className="w-5 h-5" />
+            <p className="text-xs font-bold uppercase tracking-widest">{errorMessage}</p>
+          </div>
+        )}
+      </motion.div>
     </div>
   );
 }

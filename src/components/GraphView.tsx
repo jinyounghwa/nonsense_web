@@ -36,11 +36,23 @@ export default function GraphView({
       title: char.description || char.name,
       color: {
         background: char.color,
-        border: '#ffffff',
+        border: 'rgba(255, 255, 255, 0.2)',
+        highlight: {
+          background: char.color,
+          border: '#ffffff',
+        },
       },
       font: {
         color: '#ffffff',
-        size: 14,
+        size: 16,
+        face: 'var(--font-outfit)',
+      },
+      shadow: {
+        enabled: true,
+        color: 'rgba(0,0,0,0.5)',
+        size: 10,
+        x: 0,
+        y: 4,
       },
     }));
 
@@ -50,10 +62,17 @@ export default function GraphView({
       to: rel.targetId,
       color: {
         color: RELATIONSHIP_COLORS[rel.type],
-        opacity: 0.7,
+        opacity: 0.6,
+        highlight: RELATIONSHIP_COLORS[rel.type],
       },
       width: STRENGTH_WIDTH[rel.strength],
       title: `${rel.type} (${rel.strength})${rel.description ? ': ' + rel.description : ''}`,
+      font: {
+        size: 10,
+        color: '#94a3b8',
+        face: 'var(--font-inter)',
+        strokeWidth: 0,
+      },
     }));
 
     const options = {
@@ -64,65 +83,45 @@ export default function GraphView({
           fit: true,
         },
         barnesHut: {
-          gravitationalConstant: -12000,
-          centralGravity: 0.3,
-          springLength: 200,
+          gravitationalConstant: -15000,
+          centralGravity: 0.4,
+          springLength: 250,
           springConstant: 0.04,
+          damping: 0.09,
         },
       },
       interaction: {
-        navigationButtons: true,
+        navigationButtons: false,
         keyboard: true,
         zoomView: true,
         dragView: true,
+        hover: true,
+        hideEdgesOnDrag: false,
+        hideNodesOnDrag: false,
       },
       nodes: {
         shape: 'box' as const,
         margin: {
-          top: 10,
-          bottom: 10,
-          left: 10,
-          right: 10,
+          top: 12,
+          bottom: 12,
+          left: 18,
+          right: 18,
         },
-        widthConstraint: {
-          maximum: 200,
-        },
-        scaling: {
-          min: 80,
-          max: 150,
-          label: {
-            enabled: true,
-            min: 16,
-            max: 32,
-          },
-        },
+        borderWidth: 2,
+        borderRadius: 12,
         font: {
-          size: 16,
-          face: 'Segoe UI, sans-serif',
-          color: '#ffffff',
-          bold: {
-            size: 18,
-          },
-          multi: false,
+          face: 'var(--font-outfit)',
+          weight: '700',
         },
-        borderWidth: 3,
-        borderWidthSelected: 4,
       },
       edges: {
-        width: 2,
         smooth: {
           enabled: true,
-          type: 'continuous',
+          type: 'cubicBezier',
           roundness: 0.5,
         },
         arrows: {
-          from: { enabled: false, scaleFactor: 0.5 },
-          to: { enabled: true, scaleFactor: 0.5 },
-          middle: { enabled: false },
-        },
-        arrowStrikethrough: false,
-        color: {
-          opacity: 0.8,
+          to: { enabled: true, scaleFactor: 0.8, type: 'arrow' },
         },
       },
     };
@@ -141,14 +140,8 @@ export default function GraphView({
       network.on('click', (event) => {
         if (event.nodes.length > 0) {
           onSelectNode(event.nodes[0]);
-        }
-      });
-    }
-
-    if (onSelectEdge) {
-      network.on('click', (event) => {
-        if (event.edges.length > 0) {
-          onSelectEdge(event.edges[0]);
+        } else {
+          onSelectNode('');
         }
       });
     }
@@ -163,11 +156,18 @@ export default function GraphView({
 
   if (characters.length === 0) {
     return (
-      <div className="w-full h-full flex items-center justify-center bg-slate-800/30 rounded-lg border-2 border-dashed border-purple-500/30">
-        <div className="text-center text-slate-400">
-          <p className="text-lg font-semibold">👥 캐릭터를 추가해주세요</p>
-          <p className="text-sm mt-2">관계도가 여기에 표시됩니다</p>
+      <div className="w-full h-full flex flex-col items-center justify-center p-8 text-center bg-[#0f1115]">
+        <div className="relative w-32 h-32 mb-8">
+          <div className="absolute inset-0 bg-indigo-500/10 rounded-full animate-pulse"></div>
+          <div className="absolute inset-4 bg-indigo-500/5 rounded-full animate-ping"></div>
+          <div className="absolute inset-0 flex items-center justify-center">
+            <Share2 className="w-12 h-12 text-indigo-500/40" />
+          </div>
         </div>
+        <h3 className="text-xl font-display font-bold text-white mb-2">NarrativeWeb 에 오신 것을 환영합니다</h3>
+        <p className="text-slate-500 text-sm max-w-xs leading-relaxed font-medium italic">
+          왼쪽 패널에서 캐릭터를 추가하여<br/>이야기의 인물 관계도를 완성해보세요.
+        </p>
       </div>
     );
   }
@@ -175,7 +175,7 @@ export default function GraphView({
   return (
     <div
       ref={containerRef}
-      className="w-full h-full bg-gradient-to-b from-slate-800 to-slate-900 rounded-lg border border-purple-500/20"
+      className="w-full h-full"
       style={{ minHeight: '100%' }}
     />
   );

@@ -1,119 +1,76 @@
-# NarrativeWeb
+# NarrativeWeb 🌌
 
-웹소설 창작자를 위한 인물 관계도 생성기
+웹소설 창작자를 위한 인물 관계도 시각화 대시보드
 
-## 개요
+![Project Overview](https://img.shields.io/badge/Design-Premium%20Dark-blueviolet)
+![Tech](https://img.shields.io/badge/Tech-Next.js%2015%20%7C%20Tailwind%20v4-blue)
 
-NarrativeWeb은 웹소설, 웹툰, 게임 스토리 등을 창작할 때 캐릭터와 그들의 관계를 시각적으로 정의하고 관리할 수 있는 인터랙티브 도구입니다.
+## ✨ 개요
 
-## 주요 기능
+NarrativeWeb은 웹소설, 웹툰, 시나리오 작가들이 복잡한 인물 관계를 한눈에 파악하고 직관적으로 관리할 수 있도록 설계된 **프리미엄 창작 도구**입니다. 현대적인 대시보드 인터페이스와 인터랙티브 그래프를 통해 이야기의 설계를 돕습니다.
 
-### 1. 캐릭터 관리
-- 캐릭터 추가, 수정, 삭제
-- 캐릭터별 색상 선택
-- 상세 설명 추가 가능
+## 🚀 주요 기능
 
-### 2. 관계 정의
-- 캐릭터 간 관계 설정 (친구, 적, 사랑, 가족, 경쟁, 비밀, 기타)
-- 관계 강도 설정 (약함, 중간, 강함)
-- 관계별 상세 설명
+### 1. 캐릭터 마스터링
+- **직관적인 관리**: 이름, 역할, 커스텀 컬러를 통한 캐릭터 정의.
+- **일괄 등록**: 여러 캐릭터를 한 번에 추가할 수 있는 벌크 모드 지원.
+- **유리 질감 UI**: 캐릭터별 리스트에 적용된 현대적인 Glassmorphism 디자인.
 
-### 3. 시각화
-- 인터랙티브 그래프 뷰
-- 드래그, 줌, 패닝 가능
-- 관계 종류별 색상 구분
-- 관계 강도별 선 굵기 표현
+### 2. 다차원 관계 정의
+- **관계 매핑**: 친구, 연인, 숙적 등 7가지 이상의 관계 유형 지원.
+- **유대 강도**: 선의 굵기를 통해 감정의 깊이와 관계의 비중 시각화.
+- **상세 아카이빙**: 각 관계에 대한 상세 서사 기록 가능.
 
-### 4. 저장 및 내보내기
-- JSON 형식으로 저장/불러오기
-- 프로젝트 정보 관리
+### 3. 인터랙티브 그래프 뷰
+- **실시간 엔진**: `vis-network` 기반의 물리 시뮬레이션 적용.
+- **커스텀 스타일**: 다크 테마에 최적화된 노드와 부드러운 베지에 곡선.
+- **조작 편의성**: 스마트 줌, 드래그 앤 드롭, 노드 포커싱 기능.
 
-## 기술 스택
+### 4. 데이터 워크스페이스
+- **로컬 스토리지**: 브라우저에 자동 저장되어 새로고침 후에도 유지.
+- **파일 백업**: JSON 형식의 프로젝트 내보내기 및 불러오기.
+- **샘플 데이터**: 빠른 적응을 위한 판타지 샘플 데이터 제공.
 
-- **프로젝트**: Next.js 15, React, TypeScript
-- **그래프**: vis-network
-- **스타일**: Tailwind CSS
-- **상태 관리**: React Hooks + localStorage
+## 🎨 디자인 시스템
 
-## 설치 및 실행
+- **Premium Aesthetics**: 깊이 있는 다크 모드와 Vibrant한 포인트 컬러의 조화.
+- **Typography**: 가독성을 위한 `Inter`와 심미성을 위한 `Outfit` 폰트 적용.
+- **Iconography**: `Lucide-react` 기반의 일관성 있고 세련된 아이콘 시스템.
+- **Motion**: `Framer Motion`을 활용한 부드러운 UI 전환 및 반응 효과.
 
-### 설치
+## 🛠 기술 스택
+
+- **Core**: Next.js 15 (App Router), React 19, TypeScript
+- **Styling**: Tailwind CSS v4, PostCSS
+- **Animation**: Framer Motion
+- **Visualization**: Vis-network
+- **Icons**: Lucide-React
+
+## 💻 설치 및 실행
+
 ```bash
+# 의존성 설치
 npm install
-```
 
-### 개발 서버 실행
-```bash
+# 개발 서버 실행
 npm run dev
 ```
 
-http://localhost:3000 에서 접속 가능합니다.
+http://localhost:3000 에서 프리미엄 창작 환경을 경험하세요.
 
-### 빌드
-```bash
-npm run build
-npm run start
-```
+## 📁 프로젝트 구조
 
-## 사용 방법
-
-### 1. 캐릭터 추가
-1. 좌측 "캐릭터" 탭으로 이동
-2. 캐릭터 이름, 설명, 색상 입력
-3. "추가" 버튼 클릭
-
-### 2. 관계 추가
-1. 좌측 "관계" 탭으로 이동
-2. 두 캐릭터 선택
-3. 관계 종류와 강도 설정
-4. "추가" 버튼 클릭
-
-### 3. 그래프 조작
-- **드래그**: 마우스로 노드를 드래그하여 위치 조정
-- **줌**: 마우스 휠로 확대/축소
-- **패닝**: 우클릭 또는 스페이스 + 드래그
-
-### 4. 저장 및 불러오기
-1. 좌측 "그래프" 탭으로 이동
-2. "JSON 다운로드"로 프로젝트 저장
-3. "JSON 불러오기"로 이전 프로젝트 복구
-
-## 데이터 저장
-
-- 브라우저의 localStorage에 자동 저장
-- 페이지 새로고침 후에도 데이터 유지
-- JSON 파일로 수동 백업 가능
-
-## 프로젝트 구조
-
-```
+```text
 src/
-├── components/        # React 컴포넌트
-│   ├── CharacterForm.tsx
-│   ├── RelationshipForm.tsx
-│   ├── GraphView.tsx
-│   ├── CharacterList.tsx
-│   ├── RelationshipList.tsx
-│   └── ExportImport.tsx
-├── hooks/            # 커스텀 훅
-│   └── useGraph.ts
-└── types/            # TypeScript 타입 정의
-    └── index.ts
+├── components/        # UI 컴포넌트 (CharacterForm, RelationshipList 등)
+├── hooks/            # 핵심 비즈니스 로직 (useGraph)
+└── types/            # 인터페이스 및 타입 정의
 app/
-├── page.tsx          # 메인 페이지
-├── layout.tsx        # 레이아웃
-└── globals.css       # 글로벌 스타일
+├── page.tsx          # 메인 대시보드 레이아웃
+├── layout.tsx        # 폰트 및 메타데이터 설정
+└── globals.css       # Tailwind v4 디자인 시스템 정의
 ```
-
-## 향후 기능
-
-- 타임라인별 관계 변화 시각화
-- 캐릭터 세부 정보 에디터
-- 실시간 협업
-- 템플릿 (장르별 관계도)
-- Supabase 연동 (클라우드 저장)
-- PNG/SVG 내보내기
 
 ---
 
-Made with ❤️ for storytellers
+Made with ❤️ for storytellers. *Create your universe.*

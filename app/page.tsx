@@ -1,6 +1,22 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { 
+  Users, 
+  Share2, 
+  Download, 
+  Settings, 
+  ChevronLeft, 
+  ChevronRight, 
+  Plus, 
+  Save,
+  Layers,
+  Sparkles,
+  Info,
+  Menu,
+  X
+} from 'lucide-react';
 import CharacterForm from '@/components/CharacterForm';
 import RelationshipForm from '@/components/RelationshipForm';
 import GraphView from '@/components/GraphView';
@@ -10,7 +26,7 @@ import ExportImport from '@/components/ExportImport';
 import { useGraph } from '@/hooks/useGraph';
 import { Character, Relationship } from '@/types';
 
-type TabType = 'character' | 'relationship' | 'export';
+type TabType = 'character' | 'relationship' | 'export' | 'settings';
 type EditMode = null | 'character' | 'relationship';
 
 export default function Home() {
@@ -43,10 +59,13 @@ export default function Home() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
-        <div className="text-center">
-          <div className="w-12 h-12 border-4 border-purple-500 border-t-white rounded-full animate-spin mx-auto mb-4"></div>
-          <p className="text-lg font-semibold text-white">로딩 중...</p>
+      <div className="flex items-center justify-center min-h-screen bg-[#0f1115]">
+        <div className="relative">
+          <div className="w-20 h-20 border-2 border-indigo-500/20 border-t-indigo-500 rounded-full animate-spin"></div>
+          <div className="absolute inset-0 flex items-center justify-center">
+            <div className="w-12 h-12 border-2 border-purple-500/20 border-b-purple-500 rounded-full animate-spin-slow"></div>
+          </div>
+          <p className="mt-8 text-slate-400 font-medium tracking-widest uppercase text-xs text-center animate-pulse">Initializing Narrative</p>
         </div>
       </div>
     );
@@ -86,222 +105,283 @@ export default function Home() {
     setEditingCharacter(character);
     setEditMode('character');
     setActiveTab('character');
+    if (!showSidebar) setShowSidebar(true);
   };
 
   const handleEditRelationship = (relationship: Relationship) => {
     setEditingRelationship(relationship);
     setEditMode('relationship');
     setActiveTab('relationship');
+    if (!showSidebar) setShowSidebar(true);
   };
 
   const handleSaveGraphInfo = () => {
     updateGraphInfo(graphTitle, graphDescription);
-    alert('프로젝트 정보가 저장되었습니다');
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
-      {/* Header */}
-      <header className="bg-slate-800/50 backdrop-blur-md border-b border-purple-500/20 sticky top-0 z-50">
-        <div className="max-w-7xl mx-auto px-6 py-6">
-          <div className="flex items-center justify-between mb-4">
-            <div>
-              <h1 className="text-4xl font-bold bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">
-                ✨ NarrativeWeb
-              </h1>
-              <p className="text-purple-300 text-sm mt-1">웹소설 인물 관계도 생성기</p>
+    <div className="flex h-screen overflow-hidden bg-[#0f1115] text-slate-200">
+      {/* Sidebar */}
+      <motion.aside 
+        initial={false}
+        animate={{ width: showSidebar ? 400 : 0, opacity: showSidebar ? 1 : 0 }}
+        className="relative flex flex-col border-r border-white/5 glass-card z-30"
+      >
+        <div className="flex flex-col h-full w-[400px]">
+          {/* Sidebar Header */}
+          <div className="p-6 border-b border-white/5">
+            <div className="flex items-center gap-3 mb-6">
+              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center shadow-lg shadow-indigo-500/20">
+                <Sparkles className="w-6 h-6 text-white" />
+              </div>
+              <div>
+                <h1 className="text-xl font-display font-bold text-white tracking-tight">NarrativeWeb</h1>
+                <p className="text-[10px] text-slate-500 font-bold uppercase tracking-[0.2em]">Story Design Suite</p>
+              </div>
             </div>
-            <button
-              onClick={() => setShowSidebar(!showSidebar)}
-              className="hidden lg:flex bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-500 hover:to-purple-600 text-white px-4 py-2 rounded-lg transition items-center gap-2"
-              title={showSidebar ? '사이드바 숨기기' : '사이드바 표시'}
-            >
-              {showSidebar ? '◀ 편집창 숨기기' : '▶ 편집창 보기'}
-            </button>
+
+            <nav className="flex p-1 bg-white/5 rounded-xl border border-white/5">
+              {[
+                { id: 'character', icon: Users, label: '인물' },
+                { id: 'relationship', icon: Share2, label: '관계' },
+                { id: 'export', icon: Download, label: '추출' },
+                { id: 'settings', icon: Settings, label: '설정' },
+              ].map((tab) => (
+                <button
+                  key={tab.id}
+                  onClick={() => setActiveTab(tab.id as TabType)}
+                  className={`flex-1 flex flex-col items-center justify-center py-2 px-1 rounded-lg transition-all ${
+                    activeTab === tab.id 
+                      ? 'bg-indigo-500 text-white shadow-lg shadow-indigo-500/20' 
+                      : 'text-slate-400 hover:text-white hover:bg-white/5'
+                  }`}
+                >
+                  <tab.icon className="w-4 h-4 mb-1" />
+                  <span className="text-[10px] font-bold uppercase">{tab.label}</span>
+                </button>
+              ))}
+            </nav>
           </div>
-          <div className="space-y-3 bg-slate-700/30 rounded-lg p-4 backdrop-blur-sm border border-purple-500/10">
-            <div>
-              <label className="block text-xs font-semibold text-purple-300 mb-2 uppercase tracking-widest">
-                프로젝트 제목
-              </label>
-              <input
-                type="text"
-                value={graphTitle}
-                onChange={(e) => setGraphTitle(e.target.value)}
-                placeholder="프로젝트 제목을 입력하세요"
-                className="w-full px-4 py-2 bg-slate-700 border border-purple-500/30 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 text-white placeholder-slate-400 transition"
-              />
+
+          {/* Sidebar Content */}
+          <div className="flex-1 overflow-y-auto p-6 space-y-8 custom-scrollbar">
+            <AnimatePresence mode="wait">
+              <motion.div
+                key={activeTab}
+                initial={{ opacity: 0, x: -10 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: 10 }}
+                transition={{ duration: 0.2 }}
+              >
+                {activeTab === 'character' && (
+                  <div className="space-y-6">
+                    <div className="flex items-center justify-between">
+                      <h2 className="text-lg font-display font-bold text-white">캐릭터 관리</h2>
+                      <button 
+                        onClick={() => { setEditMode('character'); setEditingCharacter(null); }}
+                        className="p-2 bg-indigo-500/10 hover:bg-indigo-500 text-indigo-400 hover:text-white rounded-lg transition-all"
+                      >
+                        <Plus className="w-4 h-4" />
+                      </button>
+                    </div>
+                    
+                    {editMode === 'character' && (
+                      <div className="p-4 bg-white/5 rounded-2xl border border-white/10 mb-6">
+                        <CharacterForm
+                          onSubmit={handleCharacterSubmit}
+                          initialValue={editingCharacter || undefined}
+                          onCancel={() => {
+                            setEditMode(null);
+                            setEditingCharacter(null);
+                          }}
+                        />
+                      </div>
+                    )}
+                    
+                    {!editMode && (
+                      <CharacterList
+                        characters={graphData.characters}
+                        onDelete={deleteCharacter}
+                        onEdit={handleEditCharacter}
+                        selectedId={selectedCharacterId || undefined}
+                      />
+                    )}
+                  </div>
+                )}
+
+                {activeTab === 'relationship' && (
+                  <div className="space-y-6">
+                    <div className="flex items-center justify-between">
+                      <h2 className="text-lg font-display font-bold text-white">관계 설정</h2>
+                      <button 
+                        onClick={() => { setEditMode('relationship'); setEditingRelationship(null); }}
+                        className="p-2 bg-indigo-500/10 hover:bg-indigo-500 text-indigo-400 hover:text-white rounded-lg transition-all"
+                        disabled={graphData.characters.length < 2}
+                      >
+                        <Plus className="w-4 h-4" />
+                      </button>
+                    </div>
+
+                    {editMode === 'relationship' && (
+                      <div className="p-4 bg-white/5 rounded-2xl border border-white/10 mb-6">
+                        <RelationshipForm
+                          characters={graphData.characters}
+                          onSubmit={handleRelationshipSubmit}
+                          initialValue={editingRelationship || undefined}
+                          onCancel={() => {
+                            setEditMode(null);
+                            setEditingRelationship(null);
+                          }}
+                        />
+                      </div>
+                    )}
+
+                    {!editMode && (
+                      <>
+                        {graphData.characters.length < 2 && (
+                          <div className="p-4 bg-amber-500/10 border border-amber-500/20 rounded-xl flex gap-3 items-start">
+                            <Info className="w-5 h-5 text-amber-500 shrink-0 mt-0.5" />
+                            <p className="text-xs text-amber-200/80 leading-relaxed font-medium">
+                              관계를 추가하려면 최소 2명 이상의 캐릭터가 필요합니다. 캐릭터 탭에서 인물을 먼저 추가해주세요.
+                            </p>
+                          </div>
+                        )}
+                        <RelationshipList
+                          relationships={graphData.relationships}
+                          characters={graphData.characters}
+                          onDelete={deleteRelationship}
+                          onEdit={handleEditRelationship}
+                        />
+                      </>
+                    )}
+                  </div>
+                )}
+
+                {activeTab === 'export' && (
+                  <div className="space-y-6">
+                    <h2 className="text-lg font-display font-bold text-white">데이터 내보내기/가져오기</h2>
+                    <ExportImport graphData={graphData} onImport={loadFromJSON} />
+                  </div>
+                )}
+
+                {activeTab === 'settings' && (
+                  <div className="space-y-6">
+                    <h2 className="text-lg font-display font-bold text-white">프로젝트 설정</h2>
+                    <div className="space-y-4">
+                      <div className="space-y-2">
+                        <label className="text-[10px] font-bold uppercase tracking-widest text-slate-500 ml-1">프로젝트 제목</label>
+                        <input
+                          type="text"
+                          value={graphTitle}
+                          onChange={(e) => setGraphTitle(e.target.value)}
+                          onBlur={handleSaveGraphInfo}
+                          className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm text-white placeholder:text-slate-600 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 transition-all"
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <label className="text-[10px] font-bold uppercase tracking-widest text-slate-500 ml-1">프로젝트 설명</label>
+                        <textarea
+                          value={graphDescription}
+                          onChange={(e) => setGraphDescription(e.target.value)}
+                          onBlur={handleSaveGraphInfo}
+                          rows={4}
+                          className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm text-white placeholder:text-slate-600 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 transition-all resize-none"
+                        />
+                      </div>
+                      <button
+                        onClick={handleSaveGraphInfo}
+                        className="w-full flex items-center justify-center gap-2 bg-indigo-500 hover:bg-indigo-600 text-white font-bold py-3 rounded-xl transition-all shadow-lg shadow-indigo-500/20"
+                      >
+                        <Save className="w-4 h-4" />
+                        <span>변경사항 저장</span>
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </motion.div>
+            </AnimatePresence>
+          </div>
+          
+          {/* Sidebar Footer */}
+          <div className="p-6 border-t border-white/5 flex items-center justify-between text-[10px] text-slate-500 font-bold uppercase tracking-widest">
+            <span>v0.2.0</span>
+            <div className="flex gap-4">
+              <span className="text-indigo-400">{graphData.characters.length} CHARS</span>
+              <span className="text-purple-400">{graphData.relationships.length} RELS</span>
             </div>
-            <div>
-              <label className="block text-xs font-semibold text-purple-300 mb-2 uppercase tracking-widest">
-                설명
-              </label>
-              <textarea
-                value={graphDescription}
-                onChange={(e) => setGraphDescription(e.target.value)}
-                placeholder="프로젝트 설명을 입력하세요"
-                rows={2}
-                className="w-full px-4 py-2 bg-slate-700 border border-purple-500/30 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 text-white placeholder-slate-400 transition"
-              />
-            </div>
-            <button
-              onClick={handleSaveGraphInfo}
-              className="w-full bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-500 hover:to-purple-600 text-white font-semibold py-2 px-4 rounded-lg transition duration-200 transform hover:scale-105"
-            >
-              💾 저장
-            </button>
           </div>
         </div>
-      </header>
+      </motion.aside>
 
       {/* Main Content */}
-      <main className="w-full px-6 py-8">
-        <div className={`grid grid-cols-1 ${showSidebar ? 'lg:grid-cols-5' : 'lg:grid-cols-1'} gap-6`}>
-          {/* Toggle Button */}
-          <button
-            onClick={() => setShowSidebar(!showSidebar)}
-            className="lg:hidden fixed bottom-6 right-6 z-40 bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-500 hover:to-purple-600 text-white p-3 rounded-full shadow-lg transition"
-            title={showSidebar ? '사이드바 숨기기' : '사이드바 표시'}
-          >
-            {showSidebar ? '◀' : '▶'}
-          </button>
-
-          {/* Sidebar */}
-          {showSidebar && (
-          <div className="lg:col-span-2 space-y-4">
-            {/* Tabs */}
-            <div className="bg-slate-800/50 backdrop-blur-md rounded-lg overflow-hidden border border-purple-500/20 shadow-xl">
-              <div className="flex gap-1 p-1">
-                <button
-                  onClick={() => setActiveTab('character')}
-                  className={`flex-1 py-3 px-4 font-semibold text-sm transition-all rounded-md ${
-                    activeTab === 'character'
-                      ? 'bg-gradient-to-r from-purple-600 to-purple-700 text-white shadow-lg'
-                      : 'text-slate-300 hover:text-white hover:bg-slate-700/50'
-                  }`}
-                >
-                  👤 캐릭터
-                </button>
-                <button
-                  onClick={() => setActiveTab('relationship')}
-                  className={`flex-1 py-3 px-4 font-semibold text-sm transition-all rounded-md ${
-                    activeTab === 'relationship'
-                      ? 'bg-gradient-to-r from-purple-600 to-purple-700 text-white shadow-lg'
-                      : 'text-slate-300 hover:text-white hover:bg-slate-700/50'
-                  }`}
-                >
-                  🔗 관계
-                </button>
-                <button
-                  onClick={() => setActiveTab('export')}
-                  className={`flex-1 py-3 px-4 font-semibold text-sm transition-all rounded-md ${
-                    activeTab === 'export'
-                      ? 'bg-gradient-to-r from-purple-600 to-purple-700 text-white shadow-lg'
-                      : 'text-slate-300 hover:text-white hover:bg-slate-700/50'
-                  }`}
-                >
-                  ⚙️ 내보내기
-                </button>
-              </div>
-            </div>
-
-            {/* Forms & Lists */}
-            <div className="space-y-4">
-              {activeTab === 'character' && (
-                <>
-                  {editMode === 'character' && (
-                    <CharacterForm
-                      onSubmit={handleCharacterSubmit}
-                      initialValue={editingCharacter || undefined}
-                      onCancel={() => {
-                        setEditMode(null);
-                        setEditingCharacter(null);
-                      }}
-                    />
-                  )}
-                  {editMode !== 'character' && (
-                    <CharacterForm
-                      onSubmit={handleCharacterSubmit}
-                      onMultiSubmit={handleMultiCharacterSubmit}
-                    />
-                  )}
-                  <CharacterList
-                    characters={graphData.characters}
-                    onDelete={deleteCharacter}
-                    onEdit={handleEditCharacter}
-                    selectedId={selectedCharacterId || undefined}
-                  />
-                </>
-              )}
-
-              {activeTab === 'relationship' && (
-                <>
-                  {editMode === 'relationship' && (
-                    <RelationshipForm
-                      characters={graphData.characters}
-                      onSubmit={handleRelationshipSubmit}
-                      initialValue={editingRelationship || undefined}
-                      onCancel={() => {
-                        setEditMode(null);
-                        setEditingRelationship(null);
-                      }}
-                    />
-                  )}
-                  {editMode !== 'relationship' && (
-                    <RelationshipForm
-                      characters={graphData.characters}
-                      onSubmit={handleRelationshipSubmit}
-                      onMultiSubmit={handleMultiRelationshipSubmit}
-                    />
-                  )}
-                  {graphData.characters.length < 2 && (
-                    <div className="p-3 bg-amber-500/20 border border-amber-500/50 rounded-lg text-sm text-amber-300">
-                      ⚠️ 관계를 추가하려면 최소 2명 이상의 캐릭터가 필요합니다
-                    </div>
-                  )}
-                  <RelationshipList
-                    relationships={graphData.relationships}
-                    characters={graphData.characters}
-                    onDelete={deleteRelationship}
-                    onEdit={handleEditRelationship}
-                  />
-                </>
-              )}
-
-              {activeTab === 'export' && <ExportImport graphData={graphData} onImport={loadFromJSON} />}
+      <main className="relative flex-1 flex flex-col min-w-0">
+        {/* Top Header Overlay */}
+        <div className="absolute top-6 left-6 right-6 z-20 flex justify-between items-start pointer-events-none">
+          <div className="flex items-center gap-3 pointer-events-auto">
+            <button
+              onClick={() => setShowSidebar(!showSidebar)}
+              className="p-3 bg-slate-900/80 backdrop-blur-md border border-white/10 rounded-2xl text-slate-400 hover:text-white hover:border-white/20 transition-all shadow-2xl"
+            >
+              {showSidebar ? <ChevronLeft className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+            </button>
+            
+            <div className="px-5 py-3 bg-slate-900/80 backdrop-blur-md border border-white/10 rounded-2xl shadow-2xl">
+              <h2 className="text-sm font-display font-bold text-white flex items-center gap-2">
+                <Layers className="w-4 h-4 text-indigo-400" />
+                {graphTitle || '무제 프로젝트'}
+              </h2>
             </div>
           </div>
-          )}
 
-          {/* Graph View */}
-          <div className="lg:col-span-3 h-screen sticky top-24">
-            <div className="bg-slate-800/50 backdrop-blur-md rounded-lg shadow-2xl overflow-hidden border border-purple-500/20">
-              <div className="p-4 border-b border-purple-500/20">
-                <h2 className="text-2xl font-bold text-white">
-                  🎭 인물 관계도
-                  <span className="ml-3 text-sm font-normal text-purple-300">
-                    {graphData.characters.length}명 · {graphData.relationships.length}개 관계
-                  </span>
-                </h2>
-              </div>
-              <div className="bg-slate-900/50">
-                <GraphView
-                  characters={graphData.characters}
-                  relationships={graphData.relationships}
-                  onSelectNode={setSelectedCharacterId}
-                />
-              </div>
+          <div className="flex gap-2 pointer-events-auto">
+            <div className="flex -space-x-2">
+              {graphData.characters.slice(0, 5).map((char, i) => (
+                <div 
+                  key={char.id} 
+                  className="w-8 h-8 rounded-full border-2 border-slate-900 flex items-center justify-center text-[10px] font-bold text-white shadow-lg overflow-hidden"
+                  style={{ backgroundColor: char.color, zIndex: 10 - i }}
+                >
+                  {char.name.charAt(0)}
+                </div>
+              ))}
+              {graphData.characters.length > 5 && (
+                <div className="w-8 h-8 rounded-full border-2 border-slate-900 bg-slate-800 flex items-center justify-center text-[8px] font-bold text-slate-400 shadow-lg z-0">
+                  +{graphData.characters.length - 5}
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+
+        {/* Graph Area */}
+        <div className="absolute inset-0 bg-[#0f1115] bg-[radial-gradient(circle_at_50%_50%,#1a1d24_0%,#0f1115_100%)]">
+          {/* Subtle Grid Pattern */}
+          <div className="absolute inset-0 opacity-[0.03] pointer-events-none" style={{ backgroundImage: 'radial-gradient(circle, white 1px, transparent 0)', backgroundSize: '40px 40px' }}></div>
+          
+          <GraphView
+            characters={graphData.characters}
+            relationships={graphData.relationships}
+            onSelectNode={setSelectedCharacterId}
+          />
+        </div>
+
+        {/* Floating Bottom Help */}
+        <div className="absolute bottom-6 right-6 pointer-events-none">
+          <div className="px-4 py-2 bg-slate-900/60 backdrop-blur-sm border border-white/5 rounded-full text-[10px] font-bold text-slate-500 uppercase tracking-widest flex items-center gap-3">
+            <div className="flex items-center gap-1.5">
+              <kbd className="px-1.5 py-0.5 bg-white/10 rounded">Wheel</kbd> Zoom
+            </div>
+            <div className="w-1 h-1 rounded-full bg-slate-700"></div>
+            <div className="flex items-center gap-1.5">
+              <kbd className="px-1.5 py-0.5 bg-white/10 rounded">Drag</kbd> Move
+            </div>
+            <div className="w-1 h-1 rounded-full bg-slate-700"></div>
+            <div className="flex items-center gap-1.5">
+              <kbd className="px-1.5 py-0.5 bg-white/10 rounded">Right Click</kbd> Pan
             </div>
           </div>
         </div>
       </main>
-
-      {/* Footer */}
-      <footer className="bg-slate-800/30 border-t border-purple-500/20 mt-12 backdrop-blur-sm">
-        <div className="max-w-7xl mx-auto px-6 py-6 text-center text-sm text-slate-400">
-          <p>Made with ❤️ for storytellers · NarrativeWeb © 2024</p>
-        </div>
-      </footer>
     </div>
   );
 }
