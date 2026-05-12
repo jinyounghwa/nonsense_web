@@ -2,6 +2,7 @@
 
 import { useEffect, useRef } from 'react';
 import { Network } from 'vis-network/peer';
+import { Share2 } from 'lucide-react';
 import {
   Character,
   Relationship,
@@ -108,7 +109,6 @@ export default function GraphView({
           right: 18,
         },
         borderWidth: 2,
-        borderRadius: 12,
         font: {
           face: 'var(--font-outfit)',
           weight: '700',
