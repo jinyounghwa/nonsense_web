@@ -3,6 +3,7 @@ export interface Character {
   name: string;
   description?: string;
   color: string;
+  group?: string;
   created_at?: string;
 }
 
@@ -12,8 +13,16 @@ export interface Relationship {
   targetId: string;
   type: 'friend' | 'enemy' | 'love' | 'family' | 'rival' | 'secret' | 'other';
   strength: 'weak' | 'medium' | 'strong';
+  label?: string;
   description?: string;
+  directional?: boolean;
   created_at?: string;
+}
+
+export interface CharacterGroup {
+  id: string;
+  name: string;
+  color: string;
 }
 
 export interface GraphData {
@@ -22,6 +31,8 @@ export interface GraphData {
   description?: string;
   characters: Character[];
   relationships: Relationship[];
+  positions?: Record<string, { x: number; y: number }>;
+  groups?: CharacterGroup[];
 }
 
 export interface Node {
@@ -31,23 +42,50 @@ export interface Node {
   color: {
     background: string;
     border: string;
+    highlight?: {
+      background: string;
+      border: string;
+    };
   };
   font: {
     color: string;
     size: number;
+    face: string;
   };
+  shadow: {
+    enabled: boolean;
+    color: string;
+    size: number;
+    x: number;
+    y: number;
+  };
+  x?: number;
+  y?: number;
 }
 
 export interface Edge {
   id: string;
   from: string;
   to: string;
+  label?: string;
   color: {
     color: string;
     opacity: number;
+    highlight?: string;
   };
   width: number;
   title: string;
+  font?: {
+    size: number;
+    color: string;
+    face: string;
+    strokeWidth: number;
+    strokeColor: string;
+    align: string;
+  };
+  arrows?: {
+    to?: { enabled: boolean; scaleFactor?: number; type?: string };
+  };
 }
 
 export const RELATIONSHIP_COLORS: Record<Relationship['type'], string> = {
@@ -74,4 +112,10 @@ export const STRENGTH_WIDTH: Record<Relationship['strength'], number> = {
   weak: 1,
   medium: 2,
   strong: 3,
+};
+
+export const STRENGTH_LABELS: Record<Relationship['strength'], string> = {
+  weak: '약함',
+  medium: '보통',
+  strong: '강함',
 };

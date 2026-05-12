@@ -2,7 +2,7 @@
 
 import { useRef, useState } from 'react';
 import { GraphData } from '@/types';
-import { Download, Upload, FileJson, Info, AlertCircle, CheckCircle2 } from 'lucide-react';
+import { Download, Upload, FileJson, Info, AlertCircle, CheckCircle2, Image } from 'lucide-react';
 import { motion } from 'framer-motion';
 
 interface ExportImportProps {
@@ -21,6 +21,8 @@ export default function ExportImport({ graphData, onImport }: ExportImportProps)
       description: graphData.description,
       characters: graphData.characters,
       relationships: graphData.relationships,
+      groups: graphData.groups,
+      positions: graphData.positions,
     };
     const timestamp = new Date().toISOString().split('T')[0];
     const filename = `narrativeweb-${graphData.title || 'export'}-${timestamp}.json`;
@@ -77,16 +79,16 @@ export default function ExportImport({ graphData, onImport }: ExportImportProps)
       title: '샘플 프로젝트',
       description: '웹소설 예시 - 판타지 이야기',
       characters: [
-        { id: '1', name: '에리엘', description: '검사', color: '#3b82f6' },
-        { id: '2', name: '루시안', description: '마법사', color: '#8b5cf6' },
-        { id: '3', name: '모르간', description: '암흑 기사', color: '#ef4444' },
-        { id: '4', name: '아리엘', description: '엘프 궁수', color: '#06b6d4' },
+        { id: '1', name: '에리엘', description: '검사', color: '#3b82f6', group: '주인공 진영' },
+        { id: '2', name: '루시안', description: '마법사', color: '#8b5cf6', group: '주인공 진영' },
+        { id: '3', name: '모르간', description: '암흑 기사', color: '#ef4444', group: '적대 진영' },
+        { id: '4', name: '아리엘', description: '엘프 궁수', color: '#06b6d4', group: '중립' },
       ],
       relationships: [
-        { id: '1', sourceId: '1', targetId: '2', type: 'friend', strength: 'strong', description: '오래된 친구' },
-        { id: '2', sourceId: '1', targetId: '3', type: 'enemy', strength: 'strong', description: '운명의 적' },
-        { id: '3', sourceId: '1', targetId: '4', type: 'love', strength: 'medium', description: '모르는 감정' },
-        { id: '4', sourceId: '2', targetId: '4', type: 'friend', strength: 'medium', description: '동료' },
+        { id: '1', sourceId: '1', targetId: '2', type: 'friend', strength: 'strong', label: '전우', description: '오래된 친구', directional: false },
+        { id: '2', sourceId: '1', targetId: '3', type: 'enemy', strength: 'strong', label: '숙명의 라이벌', description: '운명의 적', directional: true },
+        { id: '3', sourceId: '1', targetId: '4', type: 'love', strength: 'medium', label: '모르는 감정', description: '모르는 감정', directional: true },
+        { id: '4', sourceId: '2', targetId: '4', type: 'friend', strength: 'medium', label: '동료', description: '동료', directional: false },
       ],
     };
 
@@ -116,7 +118,7 @@ export default function ExportImport({ graphData, onImport }: ExportImportProps)
             </div>
             <div>
               <p className="text-sm font-bold text-white">데이터 내보내기</p>
-              <p className="text-[10px] text-slate-500 font-medium mt-0.5">현재 프로젝트를 JSON 파일로 저장합니다.</p>
+              <p className="text-[10px] text-slate-500 font-medium mt-0.5">JSON 파일로 저장 (위치/그룹 포함)</p>
             </div>
           </div>
         </button>
@@ -131,7 +133,7 @@ export default function ExportImport({ graphData, onImport }: ExportImportProps)
             </div>
             <div>
               <p className="text-sm font-bold text-white">데이터 불러오기</p>
-              <p className="text-[10px] text-slate-500 font-medium mt-0.5">저장된 JSON 파일을 불러와 복원합니다.</p>
+              <p className="text-[10px] text-slate-500 font-medium mt-0.5">저장된 JSON 파일을 불러와 복원</p>
             </div>
           </div>
         </button>
@@ -146,7 +148,7 @@ export default function ExportImport({ graphData, onImport }: ExportImportProps)
             </div>
             <div>
               <p className="text-sm font-bold text-white">샘플 데이터</p>
-              <p className="text-[10px] text-slate-500 font-medium mt-0.5">구조를 파악할 수 있는 예시 데이터를 받습니다.</p>
+              <p className="text-[10px] text-slate-500 font-medium mt-0.5">구조를 파악할 수 있는 예시</p>
             </div>
           </div>
         </button>
@@ -163,7 +165,7 @@ export default function ExportImport({ graphData, onImport }: ExportImportProps)
       <div className="flex gap-2 p-3 bg-white/5 rounded-xl border border-white/5">
         <Info className="w-4 h-4 text-slate-500 shrink-0 mt-0.5" />
         <p className="text-[10px] text-slate-500 leading-relaxed font-medium">
-          데이터는 브라우저 로컬 스토리지에 자동 저장되지만, 브라우저 캐시 삭제 시 데이터가 소실될 수 있습니다. 중요한 프로젝트는 반드시 파일로 백업하세요.
+          데이터는 브라우저 로컬 스토리지에 자동 저장되지만, 브라우저 캐시 삭제 시 소실될 수 있습니다. 중요한 프로젝트는 반드시 파일로 백업하세요.
         </p>
       </div>
 

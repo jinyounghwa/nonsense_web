@@ -80,6 +80,12 @@
   .text-gradient-primary {
     @apply bg-clip-text text-transparent bg-gradient-to-r from-indigo-400 via-purple-400 to-pink-400;
   }
+  .animate-spin-slow {
+    animation: spin 3s linear infinite;
+  }
+  @keyframes spin {
+    to { transform: rotate(360deg); }
+  }
 }
 
 /* Custom Scrollbar */
@@ -102,5 +108,12 @@
 }
 
 .vis-tooltip {
-  @apply !bg-slate-900 !text-white !border-white/10 !rounded-lg !p-3 !shadow-2xl !backdrop-blur-xl !font-sans !text-sm;
+  @apply !bg-slate-900/95 !text-white !border-white/10 !rounded-xl !p-4 !shadow-2xl !backdrop-blur-xl !font-sans !text-sm !leading-relaxed;
+  max-width: 250px !important;
+  white-space: pre-line !important;
+}
+
+/* Edge label styling via vis-network */
+.vis-network .vis-edge {
+  font-family: var(--font-inter), sans-serif;
 }

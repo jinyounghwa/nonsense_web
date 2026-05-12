@@ -1,10 +1,11 @@
 'use client';
 
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { v4 as uuidv4 } from 'uuid';
-import { Character, GraphData, Relationship } from '@/types';
+import { Character, CharacterGroup, GraphData, Relationship } from '@/types';
 
 const STORAGE_KEY = 'narrativeweb:graph';
+const MAX_HISTORY = 50;
 
 const DEFAULT_DATA: GraphData = {
   id: uuidv4(),
@@ -17,9 +18,13 @@ const DEFAULT_DATA: GraphData = {
     { id: uuidv4(), name: '사랑하는 사람', description: '감정적 연결', color: '#ec4899', created_at: new Date().toISOString() },
   ],
   relationships: [],
+  groups: [
+    { id: uuidv4(), name: '주인공 진영', color: '#3b82f6' },
+    { id: uuidv4(), name: '적대 진영', color: '#ef4444' },
+    { id: uuidv4(), name: '중립', color: '#6b7280' },
+  ],
 };
 
-// 관계 데이터 생성 (문자열 ID 참조 문제 해결)
 const createDefaultRelationships = (characters: typeof DEFAULT_DATA.characters) => [
   {
     id: uuidv4(),
@@ -27,7 +32,9 @@ const createDefaultRelationships = (characters: typeof DEFAULT_DATA.characters) 
     targetId: characters[1].id,
     type: 'friend' as const,
     strength: 'strong' as const,
-    description: '믿을 수 있는 파트너',
+    label: '믿을 수 있는 파트너',
+    description: '오랜 시간 함께해온 전우',
+    directional: false,
     created_at: new Date().toISOString(),
   },
   {
@@ -36,7 +43,9 @@ const createDefaultRelationships = (characters: typeof DEFAULT_DATA.characters) 
     targetId: characters[2].id,
     type: 'enemy' as const,
     strength: 'strong' as const,
+    label: '숙명의 적',
     description: '숙명의 적',
+    directional: true,
     created_at: new Date().toISOString(),
   },
   {
@@ -45,7 +54,9 @@ const createDefaultRelationships = (characters: typeof DEFAULT_DATA.characters) 
     targetId: characters[3].id,
     type: 'love' as const,
     strength: 'medium' as const,
+    label: '애틋한 감정',
     description: '애틋한 감정',
+    directional: false,
     created_at: new Date().toISOString(),
   },
 ];
@@ -61,11 +72,26 @@ export const useGraph = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  // Undo/Redo history
+  const pastRef = useRef<GraphData[]>([]);
+  const futureRef = useRef<GraphData[]>([]);
+
   useEffect(() => {
     try {
       const saved = localStorage.getItem(STORAGE_KEY);
       if (saved) {
-        setGraphData(JSON.parse(saved));
+        const parsed = JSON.parse(saved);
+        // Migration: ensure new fields exist
+        if (!parsed.groups) parsed.groups = [];
+        if (!parsed.positions) parsed.positions = {};
+        parsed.characters?.forEach((c: Character) => {
+          if (c.group === undefined) c.group = '';
+        });
+        parsed.relationships?.forEach((r: Relationship) => {
+          if (r.label === undefined) r.label = '';
+          if (r.directional === undefined) r.directional = true;
+        });
+        setGraphData(parsed);
       } else {
         const initialData: GraphData = {
           ...DEFAULT_DATA,
@@ -89,6 +115,49 @@ export const useGraph = () => {
     }
   }, []);
 
+  const pushHistory = useCallback((current: GraphData) => {
+    pastRef.current = [...pastRef.current.slice(-(MAX_HISTORY - 1)), current];
+    futureRef.current = [];
+  }, []);
+
+  const updateState = useCallback(
+    (updater: (prev: GraphData) => GraphData) => {
+      setGraphData((prev) => {
+        const updated = updater(prev);
+        pushHistory(prev);
+        saveToStorage(updated);
+        return updated;
+      });
+    },
+    [pushHistory, saveToStorage]
+  );
+
+  const undo = useCallback(() => {
+    if (pastRef.current.length === 0) return;
+    setGraphData((current) => {
+      futureRef.current = [...futureRef.current, current];
+      const prev = pastRef.current[pastRef.current.length - 1];
+      pastRef.current = pastRef.current.slice(0, -1);
+      saveToStorage(prev);
+      return prev;
+    });
+  }, [saveToStorage]);
+
+  const redo = useCallback(() => {
+    if (futureRef.current.length === 0) return;
+    setGraphData((current) => {
+      pastRef.current = [...pastRef.current, current];
+      const next = futureRef.current[futureRef.current.length - 1];
+      futureRef.current = futureRef.current.slice(0, -1);
+      saveToStorage(next);
+      return next;
+    });
+  }, [saveToStorage]);
+
+  const canUndo = pastRef.current.length > 0;
+  const canRedo = futureRef.current.length > 0;
+
+  // Character operations
   const addCharacter = useCallback(
     (character: Omit<Character, 'id' | 'created_at'>) => {
       const newCharacter: Character = {
@@ -96,46 +165,60 @@ export const useGraph = () => {
         id: uuidv4(),
         created_at: new Date().toISOString(),
       };
-      const updated = {
-        ...graphData,
-        characters: [...graphData.characters, newCharacter],
-      };
-      setGraphData(updated);
-      saveToStorage(updated);
+      updateState((prev) => ({
+        ...prev,
+        characters: [...prev.characters, newCharacter],
+      }));
       return newCharacter;
     },
-    [graphData, saveToStorage]
+    [updateState]
+  );
+
+  const addMultipleCharacters = useCallback(
+    (characters: Omit<Character, 'id' | 'created_at'>[]) => {
+      const newChars: Character[] = characters.map((c) => ({
+        ...c,
+        id: uuidv4(),
+        created_at: new Date().toISOString(),
+      }));
+      updateState((prev) => ({
+        ...prev,
+        characters: [...prev.characters, ...newChars],
+      }));
+      return newChars;
+    },
+    [updateState]
   );
 
   const updateCharacter = useCallback(
     (id: string, updates: Partial<Character>) => {
-      const updated = {
-        ...graphData,
-        characters: graphData.characters.map((char) =>
+      updateState((prev) => ({
+        ...prev,
+        characters: prev.characters.map((char) =>
           char.id === id ? { ...char, ...updates } : char
         ),
-      };
-      setGraphData(updated);
-      saveToStorage(updated);
+      }));
     },
-    [graphData, saveToStorage]
+    [updateState]
   );
 
   const deleteCharacter = useCallback(
     (id: string) => {
-      const updated = {
-        ...graphData,
-        characters: graphData.characters.filter((char) => char.id !== id),
-        relationships: graphData.relationships.filter(
+      updateState((prev) => ({
+        ...prev,
+        characters: prev.characters.filter((char) => char.id !== id),
+        relationships: prev.relationships.filter(
           (rel) => rel.sourceId !== id && rel.targetId !== id
         ),
-      };
-      setGraphData(updated);
-      saveToStorage(updated);
+        positions: prev.positions
+          ? Object.fromEntries(Object.entries(prev.positions).filter(([key]) => key !== id))
+          : {},
+      }));
     },
-    [graphData, saveToStorage]
+    [updateState]
   );
 
+  // Relationship operations
   const addRelationship = useCallback(
     (relationship: Omit<Relationship, 'id' | 'created_at'>) => {
       if (relationship.sourceId === relationship.targetId) {
@@ -147,48 +230,121 @@ export const useGraph = () => {
         id: uuidv4(),
         created_at: new Date().toISOString(),
       };
-      const updated = {
-        ...graphData,
-        relationships: [...graphData.relationships, newRelationship],
-      };
-      setGraphData(updated);
-      saveToStorage(updated);
+      updateState((prev) => ({
+        ...prev,
+        relationships: [...prev.relationships, newRelationship],
+      }));
       setError(null);
       return newRelationship;
     },
-    [graphData, saveToStorage]
+    [updateState]
+  );
+
+  const addMultipleRelationships = useCallback(
+    (relationships: Omit<Relationship, 'id' | 'created_at'>[]) => {
+      const valid = relationships.filter((r) => r.sourceId !== r.targetId);
+      if (valid.length === 0) return [];
+      const newRels: Relationship[] = valid.map((r) => ({
+        ...r,
+        id: uuidv4(),
+        created_at: new Date().toISOString(),
+      }));
+      updateState((prev) => ({
+        ...prev,
+        relationships: [...prev.relationships, ...newRels],
+      }));
+      return newRels;
+    },
+    [updateState]
   );
 
   const updateRelationship = useCallback(
     (id: string, updates: Partial<Relationship>) => {
-      const updated = {
-        ...graphData,
-        relationships: graphData.relationships.map((rel) =>
+      updateState((prev) => ({
+        ...prev,
+        relationships: prev.relationships.map((rel) =>
           rel.id === id ? { ...rel, ...updates } : rel
         ),
-      };
-      setGraphData(updated);
-      saveToStorage(updated);
+      }));
     },
-    [graphData, saveToStorage]
+    [updateState]
   );
 
   const deleteRelationship = useCallback(
     (id: string) => {
-      const updated = {
-        ...graphData,
-        relationships: graphData.relationships.filter((rel) => rel.id !== id),
-      };
-      setGraphData(updated);
-      saveToStorage(updated);
+      updateState((prev) => ({
+        ...prev,
+        relationships: prev.relationships.filter((rel) => rel.id !== id),
+      }));
     },
-    [graphData, saveToStorage]
+    [updateState]
   );
 
+  // Position operations
+  const savePositions = useCallback(
+    (positions: Record<string, { x: number; y: number }>) => {
+      updateState((prev) => ({
+        ...prev,
+        positions: { ...prev.positions, ...positions },
+      }));
+    },
+    [updateState]
+  );
+
+  const clearPositions = useCallback(() => {
+    updateState((prev) => ({
+      ...prev,
+      positions: {},
+    }));
+  }, [updateState]);
+
+  // Group operations
+  const addGroup = useCallback(
+    (group: Omit<CharacterGroup, 'id'>) => {
+      const newGroup: CharacterGroup = { ...group, id: uuidv4() };
+      updateState((prev) => ({
+        ...prev,
+        groups: [...(prev.groups || []), newGroup],
+      }));
+      return newGroup;
+    },
+    [updateState]
+  );
+
+  const updateGroup = useCallback(
+    (id: string, updates: Partial<CharacterGroup>) => {
+      updateState((prev) => ({
+        ...prev,
+        groups: (prev.groups || []).map((g) =>
+          g.id === id ? { ...g, ...updates } : g
+        ),
+      }));
+    },
+    [updateState]
+  );
+
+  const deleteGroup = useCallback(
+    (id: string) => {
+      updateState((prev) => ({
+        ...prev,
+        groups: (prev.groups || []).filter((g) => g.id !== id),
+        characters: prev.characters.map((c) =>
+          c.group === id ? { ...c, group: '' } : c
+        ),
+      }));
+    },
+    [updateState]
+  );
+
+  // Export/Import
   const exportToJSON = useCallback(() => {
     const data = {
+      title: graphData.title,
+      description: graphData.description,
       characters: graphData.characters,
       relationships: graphData.relationships,
+      groups: graphData.groups,
+      positions: graphData.positions,
     };
     const timestamp = new Date().toISOString().split('T')[0];
     const filename = `narrativeweb-${graphData.title}-${timestamp}.json`;
@@ -207,37 +363,48 @@ export const useGraph = () => {
 
   const loadFromJSON = useCallback(
     (data: GraphData) => {
-      const updated = {
-        ...graphData,
+      updateState((prev) => ({
+        ...prev,
+        title: data.title || prev.title,
+        description: data.description || prev.description,
         characters: data.characters || [],
         relationships: data.relationships || [],
-      };
-      setGraphData(updated);
-      saveToStorage(updated);
+        groups: data.groups || prev.groups || [],
+        positions: data.positions || {},
+      }));
     },
-    [graphData, saveToStorage]
+    [updateState]
   );
 
   const updateGraphInfo = useCallback(
     (title: string, description: string) => {
-      const updated = { ...graphData, title, description };
-      setGraphData(updated);
-      saveToStorage(updated);
+      updateState((prev) => ({ ...prev, title, description }));
     },
-    [graphData, saveToStorage]
+    [updateState]
   );
 
   return {
     graphData,
     addCharacter,
+    addMultipleCharacters,
     updateCharacter,
     deleteCharacter,
     addRelationship,
+    addMultipleRelationships,
     updateRelationship,
     deleteRelationship,
+    savePositions,
+    clearPositions,
+    addGroup,
+    updateGroup,
+    deleteGroup,
     exportToJSON,
     loadFromJSON,
     updateGraphInfo,
+    undo,
+    redo,
+    canUndo,
+    canRedo,
     loading,
     error,
     setError,

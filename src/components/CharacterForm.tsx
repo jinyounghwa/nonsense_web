@@ -1,13 +1,14 @@
 'use client';
 
 import { useState } from 'react';
-import { Character } from '@/types';
-import { UserPlus, Users, X, Check, Paintbrush, Info } from 'lucide-react';
+import { Character, CharacterGroup } from '@/types';
+import { UserPlus, Users, X, Check, Paintbrush, Info, Plus } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 interface CharacterFormProps {
   onSubmit: (character: Omit<Character, 'id' | 'created_at'>) => void;
   onMultiSubmit?: (characters: Omit<Character, 'id' | 'created_at'>[]) => void;
+  groups?: CharacterGroup[];
   initialValue?: Character;
   onCancel?: () => void;
 }
@@ -21,6 +22,7 @@ const PRESET_COLORS = [
 export default function CharacterForm({
   onSubmit,
   onMultiSubmit,
+  groups = [],
   initialValue,
   onCancel,
 }: CharacterFormProps) {
@@ -28,15 +30,17 @@ export default function CharacterForm({
   const [name, setName] = useState(initialValue?.name || '');
   const [description, setDescription] = useState(initialValue?.description || '');
   const [color, setColor] = useState(initialValue?.color || '#3b82f6');
+  const [group, setGroup] = useState(initialValue?.group || '');
   const [bulkInput, setBulkInput] = useState('');
 
   const handleSingleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!name.trim()) return;
-    onSubmit({ name: name.trim(), description: description.trim(), color });
+    onSubmit({ name: name.trim(), description: description.trim(), color, group: group || undefined });
     setName('');
     setDescription('');
     setColor('#3b82f6');
+    setGroup('');
   };
 
   const handleBulkSubmit = (e: React.FormEvent) => {
@@ -53,6 +57,7 @@ export default function CharacterForm({
           name: parts[0],
           description: parts[1] || '',
           color: parts[2] || PRESET_COLORS[index % PRESET_COLORS.length],
+          group: parts[3] || undefined,
         });
       }
     });
@@ -130,6 +135,24 @@ export default function CharacterForm({
                 />
               </div>
 
+              {groups.length > 0 && (
+                <div className="space-y-2">
+                  <label className="text-[10px] font-bold uppercase tracking-widest text-slate-500 ml-1">소속 세력/그룹</label>
+                  <select
+                    value={group}
+                    onChange={(e) => setGroup(e.target.value)}
+                    className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-xs text-white focus:outline-none focus:ring-2 focus:ring-indigo-500/50 transition-all cursor-pointer hover:bg-white/10 appearance-none"
+                  >
+                    <option value="" className="bg-slate-900">없음</option>
+                    {groups.map((g) => (
+                      <option key={g.id} value={g.name} className="bg-slate-900">
+                        {g.name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              )}
+
               <div className="space-y-3">
                 <label className="text-[10px] font-bold uppercase tracking-widest text-slate-500 ml-1 flex items-center gap-2">
                   <Paintbrush className="w-3 h-3" />
@@ -172,7 +195,7 @@ export default function CharacterForm({
                 <textarea
                   value={bulkInput}
                   onChange={(e) => setBulkInput(e.target.value)}
-                  placeholder="이름 | 설명 | 색상&#10;루인 | 기사단장 | #3b82f6&#10;엘레나 | 성녀 | #ec4899"
+                  placeholder={'이름 | 설명 | 색상 | 그룹\n루인 | 기사단장 | #3b82f6 | 주인공 진영\n엘레나 | 성녀 | #ec4899 | 주인공 진영'}
                   rows={6}
                   className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm text-white placeholder:text-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 transition-all font-mono"
                 />
@@ -180,7 +203,7 @@ export default function CharacterForm({
               <div className="flex gap-2 p-3 bg-indigo-500/5 rounded-xl border border-indigo-500/10">
                 <Info className="w-4 h-4 text-indigo-400 shrink-0 mt-0.5" />
                 <p className="text-[10px] text-indigo-300/70 leading-relaxed font-medium">
-                  각 줄에 한 명씩 입력하세요. 이름 뒤에 파이프(|)를 사용하여 설명과 헥사 색상 코드를 추가할 수 있습니다.
+                  각 줄에 한 명씩 입력. 파이프(|)로 이름, 설명, 색상, 그룹 순으로 구분.
                 </p>
               </div>
             </motion.div>
