@@ -11,7 +11,7 @@ export interface Relationship {
   id: string;
   sourceId: string;
   targetId: string;
-  type: 'friend' | 'enemy' | 'love' | 'family' | 'rival' | 'secret' | 'other';
+  type: 'friend' | 'enemy' | 'love' | 'family' | 'rival' | 'secret' | 'other' | 'siblings' | 'brothers' | 'married' | 'dating' | 'son' | 'husband' | 'father' | 'separated';
   strength: 'weak' | 'medium' | 'strong';
   label?: string;
   description?: string;
@@ -96,9 +96,35 @@ export const RELATIONSHIP_COLORS: Record<Relationship['type'], string> = {
   rival: '#f59e0b',
   secret: '#8b5cf6',
   other: '#6b7280',
+  siblings: '#06b6d4',
+  brothers: '#0ea5e9',
+  married: '#f43f5e',
+  dating: '#fb7185',
+  son: '#60a5fa',
+  husband: '#818cf8',
+  father: '#4f46e5',
+  separated: '#78716c',
 };
 
 export const RELATIONSHIP_LABELS: Record<Relationship['type'], string> = {
+  friend: '🤝 친구',
+  enemy: '⚔️ 적',
+  love: '❤️ 사랑',
+  family: '👨‍👩‍👧‍👦 가족',
+  rival: '⚡ 경쟁',
+  secret: '🤫 비밀',
+  other: '🔗 기타',
+  siblings: '👫 남매',
+  brothers: '👬 형제',
+  married: '💍 부부',
+  dating: '💕 연인',
+  son: '👦 아들',
+  husband: '🤵 남편',
+  father: '👨 아버지',
+  separated: '💔 이별',
+};
+
+export const RELATIONSHIP_LABELS_SHORT: Record<Relationship['type'], string> = {
   friend: '친구',
   enemy: '적',
   love: '사랑',
@@ -106,6 +132,14 @@ export const RELATIONSHIP_LABELS: Record<Relationship['type'], string> = {
   rival: '경쟁',
   secret: '비밀',
   other: '기타',
+  siblings: '남매',
+  brothers: '형제',
+  married: '부부',
+  dating: '연인',
+  son: '아들',
+  husband: '남편',
+  father: '아버지',
+  separated: '이별',
 };
 
 export const STRENGTH_WIDTH: Record<Relationship['strength'], number> = {

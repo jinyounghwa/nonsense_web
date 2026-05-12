@@ -224,7 +224,7 @@ export default function RelationshipForm({
                   className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm text-white placeholder:text-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 transition-all"
                 />
                 <p className="text-[9px] text-slate-600 ml-1">
-                  비워두면 관계 종류({RELATIONSHIP_LABELS[type]})가 자동으로 표시됩니다.
+                  비워두면 관계 종류가 자동으로 표시됩니다.
                 </p>
               </div>
 

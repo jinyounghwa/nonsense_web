@@ -75,6 +75,8 @@ export const useGraph = () => {
   // Undo/Redo history
   const pastRef = useRef<GraphData[]>([]);
   const futureRef = useRef<GraphData[]>([]);
+  const [canUndo, setCanUndo] = useState(false);
+  const [canRedo, setCanRedo] = useState(false);
 
   useEffect(() => {
     try {
@@ -118,44 +120,55 @@ export const useGraph = () => {
   const pushHistory = useCallback((current: GraphData) => {
     pastRef.current = [...pastRef.current.slice(-(MAX_HISTORY - 1)), current];
     futureRef.current = [];
+    setCanUndo(true);
+    setCanRedo(false);
   }, []);
 
   const updateState = useCallback(
     (updater: (prev: GraphData) => GraphData) => {
+      let prevData: GraphData | undefined;
+      let updatedData: GraphData | undefined;
       setGraphData((prev) => {
-        const updated = updater(prev);
-        pushHistory(prev);
-        saveToStorage(updated);
-        return updated;
+        prevData = prev;
+        updatedData = updater(prev);
+        return updatedData;
       });
+      // Side effects outside state updater
+      if (prevData && updatedData) {
+        pushHistory(prevData);
+        saveToStorage(updatedData);
+      }
     },
     [pushHistory, saveToStorage]
   );
 
   const undo = useCallback(() => {
     if (pastRef.current.length === 0) return;
-    setGraphData((current) => {
-      futureRef.current = [...futureRef.current, current];
-      const prev = pastRef.current[pastRef.current.length - 1];
-      pastRef.current = pastRef.current.slice(0, -1);
-      saveToStorage(prev);
-      return prev;
-    });
-  }, [saveToStorage]);
+    const prev = pastRef.current[pastRef.current.length - 1];
+    pastRef.current = pastRef.current.slice(0, -1);
+    setCanUndo(pastRef.current.length > 0);
+    setCanRedo(true);
+    // Push current to future
+    const current = graphData;
+    futureRef.current = [...futureRef.current, current];
+    saveToStorage(prev);
+    setGraphData(prev);
+  }, [graphData, saveToStorage]);
 
   const redo = useCallback(() => {
     if (futureRef.current.length === 0) return;
-    setGraphData((current) => {
-      pastRef.current = [...pastRef.current, current];
-      const next = futureRef.current[futureRef.current.length - 1];
-      futureRef.current = futureRef.current.slice(0, -1);
-      saveToStorage(next);
-      return next;
-    });
-  }, [saveToStorage]);
+    const next = futureRef.current[futureRef.current.length - 1];
+    futureRef.current = futureRef.current.slice(0, -1);
+    setCanRedo(futureRef.current.length > 0);
+    setCanUndo(true);
+    // Push current to past
+    const current = graphData;
+    pastRef.current = [...pastRef.current, current];
+    saveToStorage(next);
+    setGraphData(next);
+  }, [graphData, saveToStorage]);
 
-  const canUndo = pastRef.current.length > 0;
-  const canRedo = futureRef.current.length > 0;
+
 
   // Character operations
   const addCharacter = useCallback(

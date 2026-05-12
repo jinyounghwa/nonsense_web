@@ -19,6 +19,7 @@ import {
   Relationship,
   RELATIONSHIP_COLORS,
   RELATIONSHIP_LABELS,
+  RELATIONSHIP_LABELS_SHORT,
   STRENGTH_WIDTH,
   Node,
   Edge,
@@ -101,7 +102,7 @@ export default function GraphView({
 
     const edges: Edge[] = relationships.map((rel) => {
       const edgeLabel = showLabels
-        ? (rel.label || RELATIONSHIP_LABELS[rel.type])
+        ? (rel.label || RELATIONSHIP_LABELS_SHORT[rel.type])
         : undefined;
 
       return {
@@ -169,7 +170,6 @@ export default function GraphView({
         borderWidth: 2,
         font: {
           face: 'var(--font-outfit)',
-          weight: '700' as const,
         },
       },
       edges: {
